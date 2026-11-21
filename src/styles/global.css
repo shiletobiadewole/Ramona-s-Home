@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-obsidian: #151513;
+  --color-ivory: #FDFAF0;
+  --color-cream: #FCF0D8;
+  --color-stone-muted: #B6AF9D;
+  --color-taupe: #534F46;
+  --color-warm-gray: #878276;
+  --color-bronze-cta: #57482D;
+  --color-bronze-cta-dark: #423620;
+  --color-highlight-yellow: #FADF1E;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: #151513;
+    background-color: #FDFAF0;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #FDFAF0;
+    color: #151513;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid #57482D;
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
