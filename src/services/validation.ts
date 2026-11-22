@@ -201,8 +201,12 @@ export function parseBudgetValue(rawBudget: string): number | null {
 export function validateViewingForm(values: ViewingFormValues): ViewingFormErrors {
   const errors: ViewingFormErrors = {};
 
-  if (!values.fullName.trim()) {
-    errors.fullName = 'Please enter your full name.';
+  if (!values.firstName.trim()) {
+    errors.firstName = 'Please enter your first name.';
+  }
+
+  if (!values.lastName.trim()) {
+    errors.lastName = 'Please enter your last name.';
   }
 
   if (!values.email.trim()) {

@@ -29,7 +29,8 @@ export interface PropertyContext {
 }
 
 export interface ViewingFormValues {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   buildingTypes: PropertyCategory[];
@@ -42,7 +43,8 @@ export interface ViewingFormValues {
 
 export type ViewingFormErrors = Partial<
   Record<
-    | 'fullName'
+    | 'firstName'
+    | 'lastName'
     | 'email'
     | 'phone'
     | 'buildingTypes'

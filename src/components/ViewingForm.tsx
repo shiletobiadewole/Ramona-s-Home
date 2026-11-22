@@ -27,6 +27,8 @@ import { submitViewingRequest } from '../services/webhook';
 import { FormField } from './FormField';
 import { AvailabilitySlots } from './AvailabilitySlots';
 import { SubmissionStatus } from './SubmissionStatus';
+import { DatePickerField } from './DatePickerField';
+import { TimePickerField } from './TimePickerField';
 
 interface ViewingFormProps {
   initialPropertyContext: PropertyContext;
@@ -35,7 +37,8 @@ interface ViewingFormProps {
 
 function createInitialValues(context: PropertyContext): ViewingFormValues {
   return {
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     buildingTypes: context.propertyCategory ? [context.propertyCategory] : [],
@@ -135,7 +138,8 @@ export function ViewingForm({
       setErrorResponse(null);
       const firstErrorKey = Object.keys(validationErrors)[0];
       const fieldIdMap: Record<string, string> = {
-        fullName: 'fullName',
+        firstName: 'firstName',
+        lastName: 'lastName',
         email: 'email',
         phone: 'phone',
         buildingTypes: 'buildingType-0',
@@ -165,7 +169,7 @@ export function ViewingForm({
     }
 
     const payload: ViewingRequestPayload = {
-      fullName: activeValues.fullName.trim(),
+      fullName: `${activeValues.firstName.trim()} ${activeValues.lastName.trim()}`,
       email: activeValues.email.trim(),
       phone: activeValues.phone,
       buildingTypes: activeValues.buildingTypes,
@@ -310,28 +314,47 @@ export function ViewingForm({
       <form onSubmit={handleSubmit} noValidate className="space-y-8">
         {/* Personal Contact Details — aligned 2-column grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          <div className="md:col-span-2">
-            <FormField
-              id="fullName"
-              label="Full Name"
+          <FormField
+            id="firstName"
+            label="First Name"
+            required
+            error={errors.firstName}
+          >
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              autoComplete="given-name"
               required
-              error={errors.fullName}
-            >
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                autoComplete="name"
-                required
-                aria-invalid={Boolean(errors.fullName)}
-                aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                value={values.fullName}
-                onChange={(e) => updateField('fullName', e.target.value)}
-                placeholder="Enter your full name"
-                className={inputClassName(errors.fullName)}
-              />
-            </FormField>
-          </div>
+              aria-invalid={Boolean(errors.firstName)}
+              aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+              value={values.firstName}
+              onChange={(e) => updateField('firstName', e.target.value)}
+              placeholder="Enter your first name"
+              className={inputClassName(errors.firstName)}
+            />
+          </FormField>
+
+          <FormField
+            id="lastName"
+            label="Last Name"
+            required
+            error={errors.lastName}
+          >
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              autoComplete="family-name"
+              required
+              aria-invalid={Boolean(errors.lastName)}
+              aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+              value={values.lastName}
+              onChange={(e) => updateField('lastName', e.target.value)}
+              placeholder="Enter your last name"
+              className={inputClassName(errors.lastName)}
+            />
+          </FormField>
 
           <FormField
             id="email"
@@ -549,19 +572,15 @@ export function ViewingForm({
               required
               error={undefined}
             >
-              <input
+              <DatePickerField
                 id="viewingDate"
-                name="viewingDate"
-                type="date"
-                required
-                min={minCityDate}
-                aria-invalid={Boolean(errors.viewingDateTime)}
-                aria-describedby={
+                value={values.viewingDate}
+                minDate={minCityDate}
+                hasError={Boolean(errors.viewingDateTime)}
+                ariaDescribedBy={
                   errors.viewingDateTime ? 'viewingDateTime-error' : undefined
                 }
-                value={values.viewingDate}
-                onChange={(e) => updateField('viewingDate', e.target.value)}
-                className={`${inputClassName(errors.viewingDateTime)} tabular-nums`}
+                onChange={(dateStr) => updateField('viewingDate', dateStr)}
               />
             </FormField>
 
@@ -571,19 +590,15 @@ export function ViewingForm({
               required
               error={undefined}
             >
-              <input
+              <TimePickerField
                 id="viewingTime"
-                name="viewingTime"
-                type="time"
-                required
-                min={minCityTime}
-                aria-invalid={Boolean(errors.viewingDateTime)}
-                aria-describedby={
+                value={values.viewingTime}
+                minTime={minCityTime}
+                hasError={Boolean(errors.viewingDateTime)}
+                ariaDescribedBy={
                   errors.viewingDateTime ? 'viewingDateTime-error' : undefined
                 }
-                value={values.viewingTime}
-                onChange={(e) => updateField('viewingTime', e.target.value)}
-                className={`${inputClassName(errors.viewingDateTime)} tabular-nums`}
+                onChange={(timeStr) => updateField('viewingTime', timeStr)}
               />
             </FormField>
           </div>
@@ -622,17 +637,12 @@ export function ViewingForm({
           </FormField>
         </div>
 
-        {/* Submit Controls */}
-        <div className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[#B6AF9D]/45">
-          <p className="text-xs text-[#534F46] max-w-md">
-            Your viewing request is sent directly to our scheduling workflow for live
-            availability verification.
-          </p>
-
+        {/* Centered Submit Control */}
+        <div className="pt-6 flex justify-center border-t border-[#B6AF9D]/45">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto min-h-[48px] px-8 py-3.5 text-sm sm:text-base font-medium text-[#FDFAF0] bg-[#57482D] hover:bg-[#423620] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-150 rounded-sm whitespace-nowrap shrink-0"
+            className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto sm:min-w-[260px] min-h-[48px] px-8 py-3.5 text-sm sm:text-base font-medium text-[#FDFAF0] bg-[#57482D] hover:bg-[#423620] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-150 rounded-sm whitespace-nowrap"
           >
             {isSubmitting ? (
               <>
