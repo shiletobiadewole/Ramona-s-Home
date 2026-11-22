@@ -85,6 +85,39 @@ export function parseWebhookResponse(
   try {
     parsed = JSON.parse(rawBody);
   } catch {
+    const trimmedText = rawBody.trim();
+    const looksLikeHtml = /^<(?:!doctype|html|head|body)\b/i.test(trimmedText);
+
+    if (httpOk && trimmedText && !looksLikeHtml) {
+      const cleanText =
+        trimmedText.replace(/^The Body is:\s*/i, '').trim() || trimmedText;
+
+      if (
+        /\b(not\s+available|unavailable|no\s+longer\s+available|already\s+booked|fully\s+booked|slot\s+taken|conflict)\b/i.test(
+          cleanText
+        )
+      ) {
+        return {
+          status: 'unavailable',
+          message: cleanText,
+          availableSlots: [],
+        };
+      }
+
+      if (/\b(error|failed|exception|invalid|problem)\b/i.test(cleanText)) {
+        return {
+          status: 'error',
+          code: 'WORKFLOW_ERROR',
+          message: cleanText,
+        };
+      }
+
+      return {
+        status: 'success',
+        message: cleanText,
+      };
+    }
+
     return {
       status: 'error',
       code: 'INVALID_JSON',
