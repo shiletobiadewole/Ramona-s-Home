@@ -23,6 +23,10 @@ function isLocalhostUrl(rawUrl: string): boolean {
   }
 }
 
+function isHtmlDocument(rawBody: string): boolean {
+  return /^<(?:!doctype|html|head|body)\b/i.test(rawBody.trim());
+}
+
 export async function submitViewingRequest(
   payload: ViewingRequestPayload
 ): Promise<ParsedWebhookResponse> {
@@ -41,6 +45,7 @@ export async function submitViewingRequest(
   const timeoutId = window.setTimeout(() => controller.abort(), webhookTimeoutMs);
 
   let attemptingDirectLocalhost = false;
+  let attemptingDirectFallback = false;
 
   try {
     // Prefer same-origin /api/viewing-request (handled by Express server.ts or Cloudflare Pages Functions)
@@ -55,20 +60,21 @@ export async function submitViewingRequest(
       signal: controller.signal,
     });
 
+    const rawText = await proxyResponse.text();
     const proxyContentType = proxyResponse.headers.get('content-type') || '';
+
+    // Static SPA hosts without /api/viewing-request return 404/405 or an HTML index.html shell.
+    // Note: n8n Respond With: Text defaults to Content-Type: text/html with plain-text body,
+    // so we check that the body is actually an HTML document before treating it as a missing proxy.
     const isMissingProxyRoute =
       proxyResponse.status === 404 ||
       proxyResponse.status === 405 ||
-      proxyContentType.includes('text/html');
+      (proxyContentType.includes('text/html') && isHtmlDocument(rawText));
 
     const shouldFallbackToLocalBrowser =
       proxyResponse.status === 502 &&
       Boolean(n8nViewingWebhookUrl && isLocalhostUrl(n8nViewingWebhookUrl));
 
-    // Fall back to calling the configured Vite webhook URL directly if:
-    // - static host has no /api/viewing-request route, OR
-    // - proxy lacks runtime env var while Vite build has it, OR
-    // - remote proxy cannot reach the user's local http://localhost:5678 n8n instance
     if (
       isMissingProxyRoute ||
       shouldFallbackToLocalBrowser ||
@@ -83,6 +89,7 @@ export async function submitViewingRequest(
         };
       }
 
+      attemptingDirectFallback = true;
       attemptingDirectLocalhost = isLocalhostUrl(n8nViewingWebhookUrl);
 
       const directResponse = await fetch(n8nViewingWebhookUrl, {
@@ -103,7 +110,6 @@ export async function submitViewingRequest(
       );
     }
 
-    const rawText = await proxyResponse.text();
     if (proxyResponse.status === 503) {
       const parsed = parseWebhookResponse(
         rawText,
@@ -140,11 +146,24 @@ export async function submitViewingRequest(
       };
     }
 
+    if (attemptingDirectFallback) {
+      return {
+        status: 'error',
+        code: 'NETWORK_ERROR',
+        message:
+          'Unable to reach the viewing service directly from the browser.',
+        details:
+          'The /api/viewing-request proxy was not available on this host, and the direct browser request to the webhook URL was blocked (often due to CORS on n8n). Deploy with the /api/viewing-request function or allow CORS.',
+      };
+    }
+
     return {
       status: 'error',
       code: 'NETWORK_ERROR',
       message:
-        'Unable to reach the viewing service. Please check your connection and try again.',
+        'Unable to reach the viewing service. Please refresh the page and try again.',
+      details:
+        err instanceof Error ? `Request to /api/viewing-request failed: ${err.message}` : undefined,
     };
   } finally {
     window.clearTimeout(timeoutId);
