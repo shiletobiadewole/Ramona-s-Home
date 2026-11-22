@@ -14,6 +14,15 @@ function validateWebhookUrl(rawUrl: string | null): boolean {
   }
 }
 
+function isLocalhostUrl(rawUrl: string): boolean {
+  try {
+    const { hostname } = new URL(rawUrl);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
 export async function submitViewingRequest(
   payload: ViewingRequestPayload
 ): Promise<ParsedWebhookResponse> {
@@ -30,6 +39,8 @@ export async function submitViewingRequest(
 
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), webhookTimeoutMs);
+
+  let attemptingDirectLocalhost = false;
 
   try {
     // Prefer same-origin /api/viewing-request (handled by Express server.ts or Cloudflare Pages Functions)
@@ -50,9 +61,19 @@ export async function submitViewingRequest(
       proxyResponse.status === 405 ||
       proxyContentType.includes('text/html');
 
-    // If static host has no /api/viewing-request route (or proxy lacks runtime var while Vite build has it),
-    // fall back to calling the configured Vite webhook URL directly if present.
-    if (isMissingProxyRoute || (proxyResponse.status === 503 && n8nViewingWebhookUrl)) {
+    const shouldFallbackToLocalBrowser =
+      proxyResponse.status === 502 &&
+      Boolean(n8nViewingWebhookUrl && isLocalhostUrl(n8nViewingWebhookUrl));
+
+    // Fall back to calling the configured Vite webhook URL directly if:
+    // - static host has no /api/viewing-request route, OR
+    // - proxy lacks runtime env var while Vite build has it, OR
+    // - remote proxy cannot reach the user's local http://localhost:5678 n8n instance
+    if (
+      isMissingProxyRoute ||
+      shouldFallbackToLocalBrowser ||
+      (proxyResponse.status === 503 && n8nViewingWebhookUrl)
+    ) {
       if (!n8nViewingWebhookUrl) {
         return {
           status: 'error',
@@ -61,6 +82,8 @@ export async function submitViewingRequest(
             'Webhook endpoint is not configured. Set VITE_N8N_VIEWING_WEBHOOK_URL in your hosting environment variables (e.g., Cloudflare Pages Settings > Variables and Secrets) and redeploy.',
         };
       }
+
+      attemptingDirectLocalhost = isLocalhostUrl(n8nViewingWebhookUrl);
 
       const directResponse = await fetch(n8nViewingWebhookUrl, {
         method: 'POST',
@@ -90,9 +113,10 @@ export async function submitViewingRequest(
       return {
         status: 'error',
         code: 'CONFIG_MISSING',
-        message: parsed.status === 'error'
-          ? parsed.message
-          : 'Webhook endpoint is not configured. Set VITE_N8N_VIEWING_WEBHOOK_URL in your environment configuration and redeploy.',
+        message:
+          parsed.status === 'error'
+            ? parsed.message
+            : 'Webhook endpoint is not configured. Set VITE_N8N_VIEWING_WEBHOOK_URL in your environment configuration and redeploy.',
       };
     }
 
@@ -104,6 +128,15 @@ export async function submitViewingRequest(
         code: 'TIMEOUT',
         message:
           'The viewing request timed out while waiting for a response. Your details have been preserved—please try again.',
+      };
+    }
+
+    if (attemptingDirectLocalhost) {
+      return {
+        status: 'error',
+        code: 'NETWORK_ERROR',
+        message:
+          'Could not reach your local n8n instance at localhost:5678 from this hosted page (blocked by CORS/browser network isolation or n8n is not listening). Run the app locally or expose local n8n via a tunnel (e.g. cloudflared tunnel --url http://localhost:5678).',
       };
     }
 
