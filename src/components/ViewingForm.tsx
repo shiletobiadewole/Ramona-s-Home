@@ -28,7 +28,7 @@ import { FormField } from './FormField';
 import { AvailabilitySlots } from './AvailabilitySlots';
 import { SubmissionStatus } from './SubmissionStatus';
 import { DatePickerField } from './DatePickerField';
-import { TimePickerField } from './TimePickerField';
+import { formatTimeDisplay, TimePickerField } from './TimePickerField';
 import { PhoneInputField } from './PhoneInputField';
 
 interface ViewingFormProps {
@@ -169,12 +169,30 @@ export function ViewingForm({
       return;
     }
 
+    const trimmedFirstName = activeValues.firstName.trim();
+    const trimmedLastName = activeValues.lastName.trim();
+    const viewingDateFormatted = new Intl.DateTimeFormat('en-US', {
+      timeZone: cityTimezone,
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(new Date(resolvedDateTime.utcMs));
+    const viewingTimeFormatted =
+      formatTimeDisplay(activeValues.viewingTime) || activeValues.viewingTime;
+
     const payload: ViewingRequestPayload = {
-      fullName: `${activeValues.firstName.trim()} ${activeValues.lastName.trim()}`,
+      firstName: trimmedFirstName,
+      lastName: trimmedLastName,
+      fullName: `${trimmedFirstName} ${trimmedLastName}`,
       email: activeValues.email.trim(),
       phone: activeValues.phone,
       buildingTypes: activeValues.buildingTypes,
       viewingDateTime: resolvedDateTime.isoString,
+      viewingDate: activeValues.viewingDate,
+      viewingTime: activeValues.viewingTime,
+      viewingDateFormatted,
+      viewingTimeFormatted,
       budget: numericBudget,
       location: selectedCity,
       moreRequests: activeValues.moreRequests.trim(),

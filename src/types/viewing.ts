@@ -56,11 +56,17 @@ export type ViewingFormErrors = Partial<
 >;
 
 export interface ViewingRequestPayload {
+  firstName: string;
+  lastName: string;
   fullName: string;
   email: string;
   phone: string;
   buildingTypes: PropertyCategory[];
   viewingDateTime: string;
+  viewingDate: string;
+  viewingTime: string;
+  viewingDateFormatted: string;
+  viewingTimeFormatted: string;
   budget: number;
   location: CityLocation;
   moreRequests: string;
