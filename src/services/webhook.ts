@@ -2,26 +2,24 @@ import { getEnvironmentConfig } from '../config/environment';
 import type { ParsedWebhookResponse, ViewingRequestPayload } from '../types/viewing';
 import { parseWebhookResponse } from './responseParser';
 
+function validateWebhookUrl(rawUrl: string | null): boolean {
+  if (!rawUrl) {
+    return false;
+  }
+  try {
+    const parsedUrl = new URL(rawUrl);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export async function submitViewingRequest(
   payload: ViewingRequestPayload
 ): Promise<ParsedWebhookResponse> {
   const { n8nViewingWebhookUrl, webhookTimeoutMs } = getEnvironmentConfig();
 
-  if (!n8nViewingWebhookUrl) {
-    return {
-      status: 'error',
-      code: 'CONFIG_MISSING',
-      message:
-        'Webhook endpoint is not configured. Please set VITE_N8N_VIEWING_WEBHOOK_URL in your environment configuration before submitting requests.',
-    };
-  }
-
-  try {
-    const parsedUrl = new URL(n8nViewingWebhookUrl);
-    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      throw new Error('Invalid protocol');
-    }
-  } catch {
+  if (n8nViewingWebhookUrl && !validateWebhookUrl(n8nViewingWebhookUrl)) {
     return {
       status: 'error',
       code: 'CONFIG_MISSING',
@@ -34,9 +32,9 @@ export async function submitViewingRequest(
   const timeoutId = window.setTimeout(() => controller.abort(), webhookTimeoutMs);
 
   try {
-    // Route through same-origin /api/viewing-request proxy to avoid browser CORS preflight blocks
-    // against n8n Cloud /webhook-test/ endpoints while waiting for Respond to Webhook.
-    const response = await fetch('/api/viewing-request', {
+    // Prefer same-origin /api/viewing-request (handled by Express server.ts or Cloudflare Pages Functions)
+    // so runtime environment variables work and browser CORS preflight issues are avoided.
+    const proxyResponse = await fetch('/api/viewing-request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,8 +44,59 @@ export async function submitViewingRequest(
       signal: controller.signal,
     });
 
-    const rawText = await response.text();
-    return parseWebhookResponse(rawText, response.status, response.ok);
+    const proxyContentType = proxyResponse.headers.get('content-type') || '';
+    const isMissingProxyRoute =
+      proxyResponse.status === 404 ||
+      proxyResponse.status === 405 ||
+      proxyContentType.includes('text/html');
+
+    // If static host has no /api/viewing-request route (or proxy lacks runtime var while Vite build has it),
+    // fall back to calling the configured Vite webhook URL directly if present.
+    if (isMissingProxyRoute || (proxyResponse.status === 503 && n8nViewingWebhookUrl)) {
+      if (!n8nViewingWebhookUrl) {
+        return {
+          status: 'error',
+          code: 'CONFIG_MISSING',
+          message:
+            'Webhook endpoint is not configured. Set VITE_N8N_VIEWING_WEBHOOK_URL in your hosting environment variables (e.g., Cloudflare Pages Settings > Variables and Secrets) and redeploy.',
+        };
+      }
+
+      const directResponse = await fetch(n8nViewingWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      const directText = await directResponse.text();
+      return parseWebhookResponse(
+        directText,
+        directResponse.status,
+        directResponse.ok
+      );
+    }
+
+    const rawText = await proxyResponse.text();
+    if (proxyResponse.status === 503) {
+      const parsed = parseWebhookResponse(
+        rawText,
+        proxyResponse.status,
+        proxyResponse.ok
+      );
+      return {
+        status: 'error',
+        code: 'CONFIG_MISSING',
+        message: parsed.status === 'error'
+          ? parsed.message
+          : 'Webhook endpoint is not configured. Set VITE_N8N_VIEWING_WEBHOOK_URL in your environment configuration and redeploy.',
+      };
+    }
+
+    return parseWebhookResponse(rawText, proxyResponse.status, proxyResponse.ok);
   } catch (err: unknown) {
     if (err instanceof DOMException && err.name === 'AbortError') {
       return {

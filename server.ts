@@ -73,7 +73,10 @@ async function startServer() {
   // Server-side proxy to n8n webhook to avoid browser CORS preflight issues
   // while preserving exact POST JSON contract and waiting for Respond to Webhook.
   app.post('/api/viewing-request', async (req: Request, res: Response) => {
-    const rawWebhookUrl = process.env.VITE_N8N_VIEWING_WEBHOOK_URL
+    const rawWebhookUrl = (
+      process.env.VITE_N8N_VIEWING_WEBHOOK_URL ||
+      process.env.N8N_VIEWING_WEBHOOK_URL
+    )
       ?.trim()
       .replace(/^["']|["']$/g, '')
       .trim();
