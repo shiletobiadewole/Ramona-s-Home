@@ -29,6 +29,7 @@ import { AvailabilitySlots } from './AvailabilitySlots';
 import { SubmissionStatus } from './SubmissionStatus';
 import { DatePickerField } from './DatePickerField';
 import { TimePickerField } from './TimePickerField';
+import { PhoneInputField } from './PhoneInputField';
 
 interface ViewingFormProps {
   initialPropertyContext: PropertyContext;
@@ -360,7 +361,7 @@ export function ViewingForm({
             id="email"
             label="Email Address"
             required
-            hint="We will send viewing updates to this email address."
+            hint="We’ll send viewing confirmations and schedule updates here."
             error={errors.email}
           >
             <input
@@ -382,25 +383,19 @@ export function ViewingForm({
 
           <FormField
             id="phone"
-            label="Phone Number"
+            label="Phone Number (Canada & US)"
             required
-            hint="International formats accepted (e.g. +1 416 555 0199 or +44 20 7946 0958)."
+            hint="10-digit number, no +1 needed. We’ll use this for viewing updates."
             error={errors.phone}
           >
-            <input
+            <PhoneInputField
               id="phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              required
-              aria-invalid={Boolean(errors.phone)}
-              aria-describedby={
+              value={values.phone}
+              hasError={Boolean(errors.phone)}
+              ariaDescribedBy={
                 errors.phone ? 'phone-error phone-hint' : 'phone-hint'
               }
-              value={values.phone}
-              onChange={(e) => updateField('phone', e.target.value)}
-              placeholder="+1 416 555 0199"
-              className={inputClassName(errors.phone)}
+              onChange={(val) => updateField('phone', val)}
             />
           </FormField>
         </div>

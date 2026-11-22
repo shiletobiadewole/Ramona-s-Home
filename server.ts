@@ -35,10 +35,14 @@ function validateServerPayload(body: unknown): string | null {
   if (!isNonEmptyString(record.phone)) {
     return 'Phone number is required.';
   }
-  const digits = record.phone.replace(/\D/g, '');
-  if (digits.length < 7 || digits.length > 15) {
-    return 'Phone number must contain between 7 and 15 digits.';
+  let digits = record.phone.replace(/\D/g, '');
+  if ((record.phone.trim().startsWith('+1') || digits.length === 11) && digits.startsWith('1')) {
+    digits = digits.slice(1);
   }
+  if (digits.length !== 10) {
+    return 'Phone number must be a valid 10-digit Canadian or US number.';
+  }
+  record.phone = `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
   if (!Array.isArray(record.buildingTypes) || record.buildingTypes.length === 0) {
     return 'At least one building type is required.';
   }

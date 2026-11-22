@@ -176,14 +176,23 @@ export function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email.trim());
 }
 
-export function isValidInternationalPhone(phone: string): boolean {
+export function normalizeNorthAmericanPhoneDigits(phone: string): string | null {
   const trimmed = phone.trim();
   if (!trimmed || !PHONE_ALLOWED_CHARS_REGEX.test(trimmed)) {
-    return false;
+    return null;
   }
-  const digitsOnly = trimmed.replace(/\D/g, '');
-  // International ITU-T E.164 numbers range from 7 to 15 digits
-  return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+  let digitsOnly = trimmed.replace(/\D/g, '');
+  if ((trimmed.startsWith('+1') || digitsOnly.length === 11) && digitsOnly.startsWith('1')) {
+    digitsOnly = digitsOnly.slice(1);
+  }
+  if (digitsOnly.length !== 10) {
+    return null;
+  }
+  return digitsOnly;
+}
+
+export function isValidInternationalPhone(phone: string): boolean {
+  return normalizeNorthAmericanPhoneDigits(phone) !== null;
 }
 
 export function parseBudgetValue(rawBudget: string): number | null {
@@ -216,10 +225,9 @@ export function validateViewingForm(values: ViewingFormValues): ViewingFormError
   }
 
   if (!values.phone.trim()) {
-    errors.phone = 'Please enter your phone number.';
+    errors.phone = 'Please enter your 10-digit phone number.';
   } else if (!isValidInternationalPhone(values.phone)) {
-    errors.phone =
-      'Please enter a valid phone number with 7 to 15 digits (international formats accepted).';
+    errors.phone = 'Please enter a valid 10-digit Canadian or US phone number.';
   }
 
   if (!values.buildingTypes || values.buildingTypes.length === 0) {

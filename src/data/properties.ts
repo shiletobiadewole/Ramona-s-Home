@@ -5,6 +5,12 @@ export const HERO_IMAGE = {
   alt: 'Sunlit contemporary residential living room with bronze-framed glass walls opening onto a private landscaped courtyard garden',
 };
 
+export const HERO_VIDEO = {
+  src: '/src/assets/videos/ramona_hero_showcase.mp4',
+  posterSrc: '/src/assets/images/hero_exterior_establishing_1795336207140.jpg',
+  alt: 'Architectural showcase film featuring Ramona’s Home limestone and cedar residences, urban plexes, courtyard garden suites, movable pavilions, and sunlit interiors',
+};
+
 export const INTERIOR_DETAIL_IMAGE = {
   src: '/src/assets/images/interior_courtyard_detail_1795265798668.jpg',
   alt: 'Bespoke modern residential kitchen with honed travertine stone island, quarter-sawn oak millwork, and garden courtyard views',

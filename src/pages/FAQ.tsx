@@ -31,9 +31,9 @@ const FAQ_ITEMS: FaqItem[] = [
       'Ramona’s Home presents verified architectural typology studies online and shares active site-specific inventory, pricing, and floor plans directly upon viewing inquiry rather than publishing speculative or outdated listing details.',
   },
   {
-    question: 'Can I enter an international phone number when requesting a viewing?',
+    question: 'Do I need to type +1 or format my phone number manually?',
     answer:
-      'Yes. Our form accepts international telephone formats (including country codes such as +1, +44, or +33) and preserves your original formatting while verifying a valid digit count.',
+      'No. The +1 code for Canada and the US is already applied automatically—simply enter your 10-digit area code and phone number. Spaces, dashes, parentheses, or a pasted +1 prefix are handled automatically.',
   },
   {
     question: 'What happens if I navigate from a specific property details page?',
