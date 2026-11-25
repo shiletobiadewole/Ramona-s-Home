@@ -121,7 +121,7 @@ async function startServer() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
+          Accept: 'application/json, text/html, text/plain',
         },
         body: JSON.stringify(req.body),
         signal: controller.signal,
@@ -132,6 +132,7 @@ async function startServer() {
 
       res.status(upstream.status);
       res.setHeader('Content-Type', contentType);
+      res.setHeader('X-Viewing-Proxy', '1');
       res.send(responseText);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {

@@ -1,11 +1,13 @@
-import { CalendarClock, Check, ArrowRight, Globe } from 'lucide-react';
+import { CalendarClock, Check, ArrowRight, Globe, X } from 'lucide-react';
 import type { AvailableSlot, UnavailableResponse } from '../types/viewing';
+import { SafeHtmlRenderer } from './SafeHtmlRenderer';
 
 interface AvailabilitySlotsProps {
   response: UnavailableResponse;
   selectedSlotDateTime: string | null;
   onSelectSlot: (slot: AvailableSlot) => void;
   onConfirmSelectedSlot: () => void;
+  onDismiss: () => void;
   isSubmitting: boolean;
 }
 
@@ -45,30 +47,61 @@ export function AvailabilitySlots({
   selectedSlotDateTime,
   onSelectSlot,
   onConfirmSelectedSlot,
+  onDismiss,
   isSubmitting,
 }: AvailabilitySlotsProps) {
   const hasSlots = response.availableSlots.length > 0;
+  const hasHtmlNotice = Boolean(response.html);
 
   return (
     <section
-      aria-live="polite"
+      role="alert"
+      aria-live="assertive"
       aria-label="Viewing time availability update"
-      className="border border-[#B6AF9D] bg-[#FDFAF0] p-5 sm:p-8 space-y-6"
+      className="animate-viewing-alert border-2 border-[#57482D] bg-[#FCF0D8]/70 p-5 sm:p-8 space-y-6 rounded-sm"
     >
-      <div className="flex items-start gap-3">
-        <CalendarClock
-          className="w-5 h-5 text-[#57482D] shrink-0 mt-0.5"
-          aria-hidden="true"
-        />
-        <div className="space-y-1.5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#57482D]">
-            Requested Time Unavailable
-          </p>
-          <p className="text-sm sm:text-base text-[#151513] leading-relaxed">
-            {response.message}
-          </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="relative shrink-0 mt-0.5">
+            <CalendarClock
+              className="w-5 h-5 text-[#57482D]"
+              aria-hidden="true"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -top-1 -right-1 flex h-2.5 w-2.5"
+            >
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FADF1E] opacity-85" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#57482D]" />
+            </span>
+          </div>
+
+          <div className="space-y-1.5 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#57482D]">
+              Schedule Notice · Requested Time Unavailable
+            </p>
+            {!hasHtmlNotice && (
+              <p className="text-sm sm:text-base text-[#151513] leading-relaxed">
+                {response.message}
+              </p>
+            )}
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss notification"
+          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-xs font-medium text-[#151513] bg-white border border-[#B6AF9D] hover:border-[#151513] transition-colors rounded-sm shrink-0"
+        >
+          <X className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Dismiss</span>
+        </button>
       </div>
+
+      {hasHtmlNotice && response.html && (
+        <SafeHtmlRenderer html={response.html} hideEmbeddedForm={hasSlots} />
+      )}
 
       {hasSlots ? (
         <div className="space-y-4">
@@ -156,10 +189,12 @@ export function AvailabilitySlots({
           )}
         </div>
       ) : (
-        <p className="text-sm text-[#534F46] pt-2 border-t border-[#B6AF9D]/45">
-          No preset alternative times were returned. Please choose a different date and
-          time in the form below and submit again.
-        </p>
+        !hasHtmlNotice && (
+          <p className="text-sm text-[#534F46] pt-2 border-t border-[#B6AF9D]/45">
+            No preset alternative times were returned. Please choose a different date and
+            time in the form below and submit again.
+          </p>
+        )
       )}
     </section>
   );

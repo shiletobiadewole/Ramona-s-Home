@@ -60,6 +60,166 @@ function buildSchemaMismatchError(reason: string, rawBody?: string): ErrorRespon
   };
 }
 
+function isHtmlContent(rawBody: string): boolean {
+  const trimmed = rawBody.trim();
+  return (
+    /^<(?:!doctype|html|head|body|div|table|section|article|p|h[1-6]|span|ul|ol)\b/i.test(
+      trimmed
+    ) || /<\/(?:html|body|div|table|p|h[1-6]|span|ul|ol)>/i.test(trimmed)
+  );
+}
+
+function extractPlainTextFromHtml(html: string): string {
+  return html
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&middot;/gi, '·')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const UNAVAILABLE_KEYWORDS =
+  /\b(not\s+available|unavailable|no\s+longer\s+available|already\s+booked|already\s+taken|slot\s+taken|time\s+is\s+taken|is\s+taken|fully\s+booked|duplicate|conflict|alternative\s+slots?|other\s+available\s+slots?|alternative\s+viewing\s+times?)\b/i;
+
+function extractJsonLiteralAfterMarker(
+  source: string,
+  markerRegex: RegExp,
+  openChar: '[' | '"',
+  closeChar: ']' | '"'
+): string | null {
+  const match = markerRegex.exec(source);
+  if (!match) return null;
+
+  const startIdx = match.index + match[0].length - 1;
+  if (openChar === '"') {
+    let i = startIdx + 1;
+    let escaped = false;
+    while (i < source.length) {
+      const ch = source[i];
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === closeChar) {
+        return source.slice(startIdx, i + 1);
+      }
+      i++;
+    }
+    return null;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = startIdx; i < source.length; i++) {
+    const ch = source[i];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+    } else if (ch === '[') {
+      depth++;
+    } else if (ch === ']') {
+      depth--;
+      if (depth === 0) {
+        return source.slice(startIdx, i + 1);
+      }
+    }
+  }
+  return null;
+}
+
+function extractSlotsFromHtml(html: string): AvailableSlot[] {
+  const tzLiteral = extractJsonLiteralAfterMarker(
+    html,
+    /\bconst\s+timezone\s*=\s*"/,
+    '"',
+    '"'
+  );
+  let fallbackTimezone = 'America/Toronto';
+  if (tzLiteral) {
+    try {
+      const parsedTz = JSON.parse(tzLiteral);
+      if (isNonEmptyString(parsedTz)) {
+        fallbackTimezone = parsedTz.trim();
+      }
+    } catch {
+      // Keep default timezone
+    }
+  }
+
+  const slotsLiteral = extractJsonLiteralAfterMarker(
+    html,
+    /\bconst\s+availableSlots\s*=\s*\[/,
+    '[',
+    ']'
+  );
+  if (!slotsLiteral) {
+    return [];
+  }
+
+  try {
+    const rawList: unknown = JSON.parse(slotsLiteral);
+    if (!Array.isArray(rawList)) {
+      return [];
+    }
+
+    const slots: AvailableSlot[] = [];
+    for (const item of rawList) {
+      if (!isPlainObject(item)) continue;
+      const dateTime = isNonEmptyString(item.startTime)
+        ? item.startTime.trim()
+        : isNonEmptyString(item.dateTime)
+        ? item.dateTime.trim()
+        : '';
+      if (!dateTime) continue;
+
+      const dateLabel = isNonEmptyString(item.formattedDate)
+        ? item.formattedDate.trim()
+        : isNonEmptyString(item.label)
+        ? item.label.trim()
+        : dateTime;
+      const timeLabel = isNonEmptyString(item.formattedTime)
+        ? item.formattedTime.trim()
+        : '';
+
+      const label =
+        timeLabel && !dateLabel.includes(timeLabel)
+          ? `${dateLabel} · ${timeLabel}`
+          : dateLabel;
+
+      const slotTz = isNonEmptyString(item.timezone)
+        ? item.timezone.trim()
+        : fallbackTimezone;
+
+      slots.push({
+        dateTime,
+        label,
+        timezone: slotTz,
+      });
+    }
+    return slots;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Treats n8n Respond to Webhook output strictly as untrusted input and validates
  * exact contract fields without inventing fallback messages, slots, or references.
@@ -77,7 +237,7 @@ export function parseWebhookResponse(
         ? 'The viewing service returned an empty response body.'
         : `The viewing service returned HTTP ${httpStatus} with an empty response body.`,
       details:
-        'Ensure your n8n Webhook node is set to "Using Respond to Webhook Node" and the Respond to Webhook node returns a JSON object.',
+        'Ensure your n8n Webhook node is set to "Using Respond to Webhook Node" and the Respond to Webhook node returns a response.',
     };
   }
 
@@ -86,17 +246,42 @@ export function parseWebhookResponse(
     parsed = JSON.parse(rawBody);
   } catch {
     const trimmedText = rawBody.trim();
-    const looksLikeHtml = /^<(?:!doctype|html|head|body)\b/i.test(trimmedText);
+    const isHtml = isHtmlContent(trimmedText);
 
-    if (httpOk && trimmedText && !looksLikeHtml) {
+    if (httpOk && trimmedText) {
+      if (isHtml) {
+        const plainSummary = extractPlainTextFromHtml(trimmedText);
+        const extractedSlots = extractSlotsFromHtml(trimmedText);
+        if (UNAVAILABLE_KEYWORDS.test(plainSummary) || extractedSlots.length > 0) {
+          return {
+            status: 'unavailable',
+            message:
+              plainSummary ||
+              'The date and time you picked is unavailable. Please review the options below.',
+            availableSlots: extractedSlots,
+            html: trimmedText,
+          };
+        }
+
+        if (/\b(bad\s+gateway|gateway\s+timeout|internal\s+server\s+error|workflow\s+error|exception)\b/i.test(plainSummary)) {
+          return {
+            status: 'error',
+            code: 'WORKFLOW_ERROR',
+            message: plainSummary,
+          };
+        }
+
+        return {
+          status: 'success',
+          message: plainSummary || 'Your viewing request has been received.',
+          html: trimmedText,
+        };
+      }
+
       const cleanText =
         trimmedText.replace(/^The Body is:\s*/i, '').trim() || trimmedText;
 
-      if (
-        /\b(not\s+available|unavailable|no\s+longer\s+available|already\s+booked|fully\s+booked|slot\s+taken|conflict)\b/i.test(
-          cleanText
-        )
-      ) {
+      if (UNAVAILABLE_KEYWORDS.test(cleanText)) {
         return {
           status: 'unavailable',
           message: cleanText,
@@ -143,26 +328,72 @@ export function parseWebhookResponse(
     );
   }
 
+  const rawHtml = isNonEmptyString(parsed.html)
+    ? parsed.html.trim()
+    : isNonEmptyString(parsed.emailbody)
+    ? parsed.emailbody.trim()
+    : undefined;
+
   const rawStatus = parsed.status;
 
+  if (rawStatus === undefined && rawHtml && httpOk) {
+    const plainSummary = isNonEmptyString(parsed.message)
+      ? parsed.message.trim()
+      : extractPlainTextFromHtml(rawHtml);
+
+    if (UNAVAILABLE_KEYWORDS.test(plainSummary)) {
+      const optionalSlots =
+        parsed.availableSlots !== undefined
+          ? parseAvailableSlots(parsed.availableSlots) ?? []
+          : [];
+      return {
+        status: 'unavailable',
+        message:
+          plainSummary ||
+          'The date and time you picked is unavailable. Please review the options below.',
+        availableSlots: optionalSlots,
+        html: rawHtml,
+      };
+    }
+
+    return {
+      status: 'success',
+      message: plainSummary || 'Your viewing request has been received.',
+      html: rawHtml,
+    };
+  }
+
   if (rawStatus === 'unavailable') {
-    if (!isNonEmptyString(parsed.message)) {
+    const fallbackMessage =
+      isNonEmptyString(parsed.message)
+        ? parsed.message.trim()
+        : rawHtml
+        ? extractPlainTextFromHtml(rawHtml)
+        : '';
+
+    if (!fallbackMessage) {
       return buildSchemaMismatchError(
         'Unavailable response is missing a required "message" string.',
         rawBody
       );
     }
-    const slots = parseAvailableSlots(parsed.availableSlots);
+
+    const slots =
+      parsed.availableSlots === undefined && rawHtml
+        ? []
+        : parseAvailableSlots(parsed.availableSlots);
     if (slots === null) {
       return buildSchemaMismatchError(
         'Unavailable response requires an "availableSlots" array with dateTime, label, and timezone fields.',
         rawBody
       );
     }
+
     const result: UnavailableResponse = {
       status: 'unavailable',
-      message: parsed.message.trim(),
+      message: fallbackMessage,
       availableSlots: slots,
+      ...(rawHtml ? { html: rawHtml } : {}),
     };
     return result;
   }
@@ -175,7 +406,12 @@ export function parseWebhookResponse(
         message: `Viewing service returned HTTP ${httpStatus} alongside success status.`,
       };
     }
-    if (!isNonEmptyString(parsed.message)) {
+    const successMessage = isNonEmptyString(parsed.message)
+      ? parsed.message.trim()
+      : rawHtml
+      ? extractPlainTextFromHtml(rawHtml)
+      : '';
+    if (!successMessage) {
       return buildSchemaMismatchError(
         'Success response is missing a required "message" string.',
         rawBody
@@ -204,13 +440,14 @@ export function parseWebhookResponse(
 
     const result: SuccessResponse = {
       status: 'success',
-      message: parsed.message.trim(),
+      message: successMessage,
       ...(isNonEmptyString(parsed.reference)
         ? { reference: parsed.reference.trim() }
         : {}),
       ...(isNonEmptyString(parsed.confirmation)
         ? { confirmation: parsed.confirmation.trim() }
         : {}),
+      ...(rawHtml ? { html: rawHtml } : {}),
     };
     return result;
   }

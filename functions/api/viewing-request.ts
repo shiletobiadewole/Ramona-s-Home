@@ -138,7 +138,7 @@ export async function onRequestPost(context: CloudflarePagesContext): Promise<Re
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json',
+        Accept: 'application/json, text/html, text/plain',
       },
       body: JSON.stringify(body),
       signal: controller.signal,
@@ -151,6 +151,7 @@ export async function onRequestPost(context: CloudflarePagesContext): Promise<Re
       status: upstream.status,
       headers: {
         'Content-Type': contentType,
+        'X-Viewing-Proxy': '1',
       },
     });
   } catch (err: unknown) {

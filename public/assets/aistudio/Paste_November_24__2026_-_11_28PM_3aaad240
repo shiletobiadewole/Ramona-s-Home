@@ -1,0 +1,1250 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5dcfda12-4cf2-419b-8dc5-c00fa9dc350a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "20c872c0-2566-479b-b38e-a10c1e31943d",
+      "name": "Webhook1",
+      "webhookId": "5dcfda12-4cf2-419b-8dc5-c00fa9dc350a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "The Chosen Date is not available",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "https://ramonashome.pages.dev"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1424,
+        352
+      ],
+      "id": "98986804-da35-4711-a8c6-62258ef0ac98",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9ec57fa4-5edb-4c04-b470-adf9919d4361",
+              "name": "fullName",
+              "value": "={{ String($json.body.fullName || '').trim().toLowerCase().replace(/(^|[\\s'-])\\p{L}/gu, match => match.toUpperCase()) }}",
+              "type": "string"
+            },
+            {
+              "id": "e72cfa37-ef50-407d-a0fb-51b9d67838a5",
+              "name": "email",
+              "value": "={{ String($json.body.email || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "97530217-156a-404b-9d7b-f7bc2645e0c3",
+              "name": "phone",
+              "value": "={{ String($json.body.phone || '').trim().replace(/[^\\d+]/g, '').replace(/(?!^)\\+/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "4934c81c-9a07-4779-a3a8-5c07e0fe7865",
+              "name": "buildingTypes",
+              "value": "={{ Array.isArray($json.body.buildingTypes) ? $json.body.buildingTypes.map(item => String(item).trim()).filter(Boolean).join(' and ') : String($json.body.buildingTypes || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "92966324-46f5-4ebf-9e88-94c4922f9030",
+              "name": "viewingDateTime",
+              "value": "={{ $json.body.viewingDateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "14808a55-892b-469d-b5c7-58334367ae20",
+              "name": "budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "number"
+            },
+            {
+              "id": "fa50ead5-ce3f-4440-9e0c-819cdc0d13fa",
+              "name": "location",
+              "value": "={{ $json.body.location }}",
+              "type": "string"
+            },
+            {
+              "id": "ae4276d3-6017-4ce5-b901-5630e9367886",
+              "name": "moreRequests",
+              "value": "={{ (String($json.body.moreRequests || '').trim() ? String($json.body.moreRequests).trim().toLowerCase().replace(/\\b[a-z]/g, char => char.toUpperCase()) + '.' : '') + '\\n\\nYou can also email us at enquiry@ramonashouse.com for more information.' }}",
+              "type": "string"
+            },
+            {
+              "id": "37ec1f83-1aa5-4233-8045-59681f4164a1",
+              "name": "timezone",
+              "value": "={{ $json.body.timezone }}",
+              "type": "string"
+            },
+            {
+              "id": "7f7d19f1-1a5e-46ec-b443-b9a648ab881a",
+              "name": "time submitted",
+              "value": "={{ $now.setZone($json.body.timezone || 'America/Toronto').toFormat('dd/MM/yyyy HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "5a5d062e-5d79-4d6c-a2a0-ea10b59ef4a1",
+              "name": "viewing time",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).toFormat('hh:mm a') }}",
+              "type": "string"
+            },
+            {
+              "id": "e126f76b-6287-4572-a9bf-a7a4f845aa59",
+              "name": "viewing date",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).toFormat('dd/MM/yyyy') }}",
+              "type": "string"
+            },
+            {
+              "id": "79a89952-4ada-4247-9d1a-dd7f83aecb44",
+              "name": "endTime",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).plus({ hours: 2 }).toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "ecdf5bcd-6be5-4854-ba31-d4ac09cef429",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "tobiadewole43@gmail.com",
+          "mode": "list",
+          "cachedResultName": "tobiadewole43@gmail.com"
+        },
+        "timeMin": "={{ $json.viewingDateTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        -32
+      ],
+      "id": "dad720e5-dd9c-4f37-986d-78f7279ee88f",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n/**\n * RAMONAS HOUSE\n * Lead Qualification & Appointment Availability Engine\n *\n * Features:\n * 1. Hot, Warm and Cold lead classification\n * 2. Special request financial normalization\n * 3. Two-hour appointment availability checking\n * 4. Five nearest alternative appointment suggestions\n *\n * Input:\n * Edit Fields + Get many events (Google Calendar)\n *\n * Code Node Mode:\n * Run Once for All Items\n */\n\n// ==========================================\n// 1. CONFIGURATION\n// ==========================================\n\nconst CONFIG = {\n  meetingDurationHours: 2,\n\n  currency: 'CAD',\n\n  timezone: $('Edit Fields').first().json.timezone || 'America/Toronto',\n\n  minimumBudget: 5000000,\n  hotBudget: 50000000,\n  warmBudget: 10000000,\n\n  workingHours: {\n    start: 9,\n    end: 17\n  },\n\n  workingDays: [1, 2, 3, 4, 5], // Monday-Friday\n\n  slotIntervalMinutes: 30,\n\n  alternativesRequired: 5,\n\n  searchDaysBefore: 30,\n  searchDaysAfter: 30\n};\n\n\n// ==========================================\n// 2. RETRIEVE CUSTOMER DATA\n// ==========================================\n\nconst customer = $('Edit Fields').first().json;\n\nconst calendarItems = $input.all();\n\nconst requestedDateTime = customer.viewingDateTime;\n\nif (!requestedDateTime) {\n  throw new Error('Missing customer viewingDateTime.');\n}\n\nconst requestedStart = new Date(requestedDateTime);\n\nif (isNaN(requestedStart.getTime())) {\n  throw new Error('Invalid viewingDateTime supplied.');\n}\n\nconst requestedEnd = new Date(\n  requestedStart.getTime() +\n  CONFIG.meetingDurationHours * 60 * 60 * 1000\n);\n\nconst now = new Date();\n\n\n// ==========================================\n// 3. TIMEZONE UTILITIES\n// ==========================================\n\nfunction getLocalParts(date, timezone) {\n\n  const formatter = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    weekday: 'short',\n    hourCycle: 'h23'\n  });\n\n  const parts = formatter.formatToParts(date);\n\n  const result = {};\n\n  for (const part of parts) {\n    if (part.type !== 'literal') {\n      result[part.type] = part.value;\n    }\n  }\n\n  return result;\n}\n\n\n// Convert a local calendar date and time into UTC.\n// Handles daylight-saving-time offsets using the IANA timezone.\n\nfunction localToUTC(year, month, day, hour, minute, timezone) {\n\n  const target = Date.UTC(\n    year, month - 1, day, hour, minute, 0\n  );\n\n  let timestamp = target;\n\n  for (let i = 0; i < 3; i++) {\n\n    const parts = getLocalParts(\n      new Date(timestamp),\n      timezone\n    );\n\n    const represented = Date.UTC(\n      Number(parts.year),\n      Number(parts.month) - 1,\n      Number(parts.day),\n      Number(parts.hour),\n      Number(parts.minute),\n      Number(parts.second)\n    );\n\n    timestamp += target - represented;\n  }\n\n  const check = getLocalParts(\n    new Date(timestamp),\n    timezone\n  );\n\n  if (\n    Number(check.year) !== year ||\n    Number(check.month) !== month ||\n    Number(check.day) !== day ||\n    Number(check.hour) !== hour ||\n    Number(check.minute) !== minute\n  ) {\n    throw new Error(\n      'Invalid or ambiguous local appointment time.'\n    );\n  }\n\n  return new Date(timestamp);\n}\n\n\n// ==========================================\n// 4. LEAD QUALIFICATION\n// ==========================================\n\nconst budget = Number(customer.budget || 0);\n\nif (!Number.isFinite(budget) || budget < 0) {\n  throw new Error('Invalid customer budget.');\n}\n\nconst viewingLocal = getLocalParts(\n  requestedStart,\n  CONFIG.timezone\n);\n\nconst todayLocal = getLocalParts(\n  now,\n  CONFIG.timezone\n);\n\n// Compare local calendar dates rather than raw hours.\n\nconst viewingDay = Date.UTC(\n  Number(viewingLocal.year),\n  Number(viewingLocal.month) - 1,\n  Number(viewingLocal.day)\n);\n\nconst todayDay = Date.UTC(\n  Number(todayLocal.year),\n  Number(todayLocal.month) - 1,\n  Number(todayLocal.day)\n);\n\nconst daysUntilViewing = Math.round(\n  (viewingDay - todayDay) / 86400000\n);\n\nlet leadCategory = 'Warm';\n\n// Cold: Below $5 million, regardless of date.\n\nif (budget < CONFIG.minimumBudget) {\n\n  leadCategory = 'Cold lead';\n\n}\n\n// Hot: $50 million or above, viewing in 1–14 days.\n\nelse if (\n  budget >= CONFIG.hotBudget &&\n  daysUntilViewing >= 1 &&\n  daysUntilViewing <= 14\n) {\n\n  leadCategory = 'Hot lead';\n\n}\n\n// Warm: $5m–$49,999,999, viewing in 21–28 days.\n\nelse if (\n  budget >= CONFIG.minimumBudget &&\n  budget < CONFIG.hotBudget &&\n  daysUntilViewing >= 21 &&\n  daysUntilViewing <= 28\n) {\n\n  leadCategory = 'Warm lead';\n\n}\n\n// Additional Warm rule:\n// Budget of $10m or more and viewing within 1 day\n// or 3 weeks and beyond.\n\nelse if (\n  budget >= CONFIG.warmBudget &&\n  (\n    daysUntilViewing <= 1 ||\n    daysUntilViewing >= 21\n  )\n) {\n\n  leadCategory = 'Warm lead';\n\n}\n\n// Leads that do not meet any specified criteria\n// remain Warm as a default pending further review.\n\n\n// ==========================================\n// 5. SPECIAL REQUEST NORMALIZATION\n// ==========================================\n\nlet specialRequest = String(\n  customer.moreRequests || ''\n).trim();\n\n// Convert abbreviated financial amounts:\n//\n// 1k CAD  -> 1000 CAD\n// 10k CAD -> 10000 CAD\n// 1m CAD  -> 1000000 CAD\n// 50m     -> 50000000 CAD\n// 1.5m    -> 1500000 CAD\n//\n// Only numbers with k, m or b suffixes are changed.\n// Ordinary numbers such as 2 bedrooms remain unchanged.\n\nspecialRequest = specialRequest.replace(\n  /\\b(\\d+(?:\\.\\d+)?)\\s*([kmb])(?:\\s*CAD)?\\b/gi,\n  (match, amount, suffix) => {\n\n    const multipliers = {\n      k: 1000,\n      m: 1000000,\n      b: 1000000000\n    };\n\n    const normalizedAmount =\n      Number(amount) *\n      multipliers[suffix.toLowerCase()];\n\n    return `${Number(normalizedAmount.toFixed(2))} CAD`;\n  }\n);\n\n\n// ==========================================\n// 6. GOOGLE CALENDAR EVENT PROCESSING\n// ==========================================\n\n// Ignore empty outputs and cancelled events.\n\nconst events = calendarItems\n  .map(item => item.json)\n  .filter(event =>\n    event &&\n    event.start &&\n    event.end &&\n    event.status !== 'cancelled'\n  );\n\n\n// Handle both timed and all-day calendar events.\n\nfunction getEventRange(event) {\n\n  let start;\n  let end;\n\n  if (event.start.dateTime) {\n\n    start = new Date(event.start.dateTime);\n\n    end = new Date(event.end.dateTime);\n\n  } else if (event.start.date && event.end.date) {\n\n    const [sy, sm, sd] = event.start.date\n      .split('-').map(Number);\n\n    const [ey, em, ed] = event.end.date\n      .split('-').map(Number);\n\n    start = localToUTC(\n      sy, sm, sd, 0, 0, CONFIG.timezone\n    );\n\n    end = localToUTC(\n      ey, em, ed, 0, 0, CONFIG.timezone\n    );\n\n  } else {\n\n    return null;\n\n  }\n\n  if (\n    isNaN(start.getTime()) ||\n    isNaN(end.getTime()) ||\n    end <= start\n  ) {\n    return null;\n  }\n\n  return {\n    start: start.getTime(),\n    end: end.getTime()\n  };\n}\n\nconst busyEvents = events\n  .map(getEventRange)\n  .filter(Boolean);\n\n\n// Check whether two appointments overlap.\n\nfunction isOverlapping(start, end, event) {\n\n  return (\n    start < event.end &&\n    end > event.start\n  );\n\n}\n\n\n// ==========================================\n// 7. CHECK REQUESTED APPOINTMENT\n// ==========================================\n\nconst requestedStartMs = requestedStart.getTime();\n\nconst requestedEndMs = requestedEnd.getTime();\n\nconst isBooked = busyEvents.some(event =>\n  isOverlapping(\n    requestedStartMs,\n    requestedEndMs,\n    event\n  )\n);\n\nlet appointmentStatus;\n\nlet availableSlots = [];\n\n\n// ==========================================\n// 8. FIND FIVE NEAREST AVAILABLE SLOTS\n// ==========================================\n\nif (!isBooked) {\n\n  appointmentStatus = 'Available Slot';\n\n} else {\n\n  appointmentStatus = 'Booked - Alternative Slots Found';\n\n  const localDate = new Date(Date.UTC(\n    Number(viewingLocal.year),\n    Number(viewingLocal.month) - 1,\n    Number(viewingLocal.day)\n  ));\n\n  const candidates = [];\n\n  for (\n    let offset = -CONFIG.searchDaysBefore;\n    offset <= CONFIG.searchDaysAfter;\n    offset++\n  ) {\n\n    const day = new Date(localDate);\n\n    day.setUTCDate(day.getUTCDate() + offset);\n\n    const year = day.getUTCFullYear();\n    const month = day.getUTCMonth() + 1;\n    const date = day.getUTCDate();\n\n    const weekday = day.getUTCDay();\n\n    // Skip weekends and non-working days.\n\n    if (!CONFIG.workingDays.includes(weekday)) {\n      continue;\n    }\n\n    // Generate appointments every 30 minutes.\n\n    for (\n      let minutes = CONFIG.workingHours.start * 60;\n      minutes + CONFIG.meetingDurationHours * 60 <=\n        CONFIG.workingHours.end * 60;\n      minutes += CONFIG.slotIntervalMinutes\n    ) {\n\n      const hour = Math.floor(minutes / 60);\n\n      const minute = minutes % 60;\n\n      const slotStart = localToUTC(\n        year,\n        month,\n        date,\n        hour,\n        minute,\n        CONFIG.timezone\n      );\n\n      const slotEnd = new Date(\n        slotStart.getTime() +\n        CONFIG.meetingDurationHours * 60 * 60 * 1000\n      );\n\n      const startMs = slotStart.getTime();\n\n      const endMs = slotEnd.getTime();\n\n      // Do not suggest appointments in the past.\n\n      if (startMs <= now.getTime()) {\n        continue;\n      }\n\n      // Exclude the original requested slot.\n\n      if (startMs === requestedStartMs) {\n        continue;\n      }\n\n      // Check all existing calendar appointments.\n\n      const occupied = busyEvents.some(event =>\n        isOverlapping(startMs, endMs, event)\n      );\n\n      if (!occupied) {\n\n        candidates.push({\n          start: slotStart,\n          end: slotEnd,\n          distance: Math.abs(\n            startMs - requestedStartMs\n          )\n        });\n\n      }\n\n    }\n\n  }\n\n  // Rank by closeness to the requested appointment.\n\n  candidates.sort((a, b) => {\n\n    if (a.distance !== b.distance) {\n      return a.distance - b.distance;\n    }\n\n    return a.start.getTime() - b.start.getTime();\n\n  });\n\n  availableSlots = candidates\n    .slice(0, CONFIG.alternativesRequired)\n    .map((slot, index) => ({\n\n      option: index + 1,\n\n      startTime: slot.start.toISOString(),\n\n      endTime: slot.end.toISOString(),\n\n      viewingDate: getLocalParts(\n        slot.start,\n        CONFIG.timezone\n      ),\n\n      formattedDate: new Intl.DateTimeFormat(\n        'en-CA',\n        {\n          timeZone: CONFIG.timezone,\n          day: '2-digit',\n          month: 'long',\n          year: 'numeric'\n        }\n      ).format(slot.start),\n\n      formattedTime: new Intl.DateTimeFormat(\n        'en-CA',\n        {\n          timeZone: CONFIG.timezone,\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }\n      ).format(slot.start)\n\n    }));\n\n}\n\n\n// ==========================================\n// 9. FINAL OUTPUT\n// ==========================================\n\nreturn [\n  {\n    json: {\n\n      // Preserve normalized customer information.\n\n      ...customer,\n\n      // Lead qualification.\n\n      leadCategory,\n\n      daysUntilViewing,\n\n      // Special request.\n\n      specialRequest,\n\n      // Appointment information.\n\n      appointmentStatus,\n\n      requestedAppointment: {\n        startTime: requestedStart.toISOString(),\n        endTime: requestedEnd.toISOString(),\n        durationHours: CONFIG.meetingDurationHours,\n        timezone: CONFIG.timezone\n      },\n\n      // Alternative appointments.\n\n      availableSlots,\n\n      availableSlotsCount: availableSlots.length,\n\n      // Calendar diagnostics.\n\n      calendarEventsFound: busyEvents.length\n\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -32
+      ],
+      "id": "e7d5fd86-9bea-41fe-8b30-abd2fe5dd9ba",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "8bbaa87b-2c22-47c9-bcc4-2db370bd3c43",
+              "leftValue": "={{ $json.appointmentStatus }}",
+              "rightValue": " Booked - Alternative Slots Found",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        896,
+        0
+      ],
+      "id": "0bd0bc0e-8c40-41fe-83ac-b3d6836d0592",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1184,
+        256
+      ],
+      "id": "b099e21a-df4a-4233-98ea-4cd6d9361f36",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Hot lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6169b5ca-e96a-44ec-a77a-be61afcb7fcb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "13716639-29c5-4fd8-865c-3eb30691d26a",
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Warm lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "167a5525-1132-4bd2-9872-ed53ed460382",
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Cold lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold lead"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        1248,
+        -16
+      ],
+      "id": "2eb2b313-3e2e-4dc0-8ac3-4806ce774c5b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hot lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "email": "={{ $json.email }}",
+            "fullName": "={{ $json.fullName }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}",
+            "availableSlotsCount": "={{ $json.availableSlotsCount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1584,
+        -144
+      ],
+      "id": "fadf3ee7-a4d1-41ba-891c-c5700d9a4373",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 869521312,
+          "mode": "list",
+          "cachedResultName": "Warm lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=869521312"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "fullName": "={{ $json.fullName }}",
+            "email": "={{ $json.email }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "2b29bc20-7f77-4236-9cb0-7f6cb455be64",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hot lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "email": "={{ $json.email }}",
+            "fullName": "={{ $json.fullName }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}",
+            "availableSlotsCount": "={{ $json.availableSlotsCount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        128
+      ],
+      "id": "090b2d3d-4234-427a-9173-4db4e1c6ff62",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a53ac292-b949-4a86-a643-16dec4fd3a83",
+              "name": "email",
+              "value": "={{ $('Switch').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "fc8fc671-099d-4305-9f9f-70e5906e637d",
+              "name": "subjectline",
+              "value": "=Confirmation of Viewing for {{ $('Switch').item.json.buildingTypes }} - {{ $('Switch').item.json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "76273c4a-52cb-410d-a622-49dc41ca3085",
+              "name": "emailbody",
+              "value": "=\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta name=\"color-scheme\" content=\"light\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>Viewing Appointment | Ramona's Home</title>\n\n  <style>\n    body {\n      margin: 0 !important;\n      padding: 0 !important;\n      background-color: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      -webkit-text-size-adjust: 100%;\n    }\n\n    table {\n      border-spacing: 0;\n      border-collapse: collapse;\n    }\n\n    img {\n      border: 0;\n      display: block;\n    }\n\n    a {\n      color: #57482D;\n    }\n\n    @media only screen and (max-width: 600px) {\n      .email-wrapper {\n        padding: 15px 8px !important;\n      }\n\n      .email-container {\n        width: 100% !important;\n      }\n\n      .content-padding {\n        padding-left: 22px !important;\n        padding-right: 22px !important;\n      }\n\n      .main-heading {\n        font-size: 26px !important;\n      }\n\n      .detail-label {\n        width: 35% !important;\n      }\n\n      .detail-value {\n        word-break: break-word !important;\n      }\n\n      .appointment-date {\n        font-size: 21px !important;\n      }\n    }\n  </style>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#FDFAF0;\">\n\n  <!-- Hidden email preview -->\n  <div style=\"display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;\">\n    Your property viewing appointment details from Ramona's Home.\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0;\">\n    <tr>\n      <td align=\"center\" class=\"email-wrapper\" style=\"padding:35px 15px;\">\n\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"email-container\" style=\"width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid #E9E2D4;\">\n\n          <!-- Header -->\n          <tr>\n            <td align=\"center\" style=\"padding:38px 25px 32px; background-color:#FDFAF0; border-bottom:1px solid #E9E2D4;\">\n\n              <p style=\"margin:0; color:#57482D; font-size:11px; font-weight:bold; letter-spacing:4px; text-transform:uppercase;\">\n                RAMONA'S HOME\n              </p>\n\n              <table role=\"presentation\" width=\"42\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:19px auto;\">\n                <tr>\n                  <td height=\"2\" style=\"height:2px; background-color:#FADF1E; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <h1 class=\"main-heading\" style=\"margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:30px; line-height:1.35; font-weight:normal; color:#151513;\">\n                Your Viewing Appointment\n              </h1>\n\n              <p style=\"margin:12px 0 0; font-size:14px; line-height:1.7; color:#878276;\">\n                Let's take the next step towards finding your ideal property.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Greeting -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:32px 38px 20px;\">\n\n              <p style=\"margin:0 0 13px; color:#151513; font-size:15px; line-height:1.7;\">\n                Hello {{ String($('Switch').item.json.fullName || 'there').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }},\n              </p>\n\n              <p style=\"margin:0; color:#534F46; font-size:14px; line-height:1.85;\">\n                Thank you for choosing Ramona's Home. We've received your property enquiry and scheduled your viewing appointment. Please review the details below and respond to the calendar invitation to confirm whether the proposed time works for you.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Appointment Card -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:12px 38px 28px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FCF0D8; border-left:4px solid #57482D;\">\n                <tr>\n                  <td style=\"padding:24px 24px 22px;\">\n\n                    <p style=\"margin:0 0 14px; color:#57482D; font-size:10px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;\">\n                      YOUR APPOINTMENT\n                    </p>\n\n                    <p class=\"appointment-date\" style=\"margin:0 0 8px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:25px; line-height:1.4;\">\n                      {{ $('Switch').item.json['viewing date'] }}\n                    </p>\n\n                    <p style=\"margin:0; color:#534F46; font-size:16px; line-height:1.6;\">\n                      {{ $('Switch').item.json['viewing time'] }}\n                    </p>\n\n                    <p style=\"margin:8px 0 0; color:#878276; font-size:12px; line-height:1.6;\">\n                      {{ (() => {\n                        const data = $('Switch').item.json;\n                        const zone = data.timezone || 'America/Toronto';\n                        const appointment = data.viewingDateTime;\n                        if (!appointment) return zone;\n                        return DateTime.fromISO(appointment, { setZone: true })\n                          .setZone(zone)\n                          .toFormat('ZZZZ') + ' (' + zone + ')';\n                      })() }}\n                    </p>\n\n                    <p style=\"margin:13px 0 0; color:#878276; font-size:12px;\">\n                      Property viewing · 2-hour appointment\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Property Enquiry -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 30px;\">\n\n              <h2 style=\"margin:0 0 16px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:21px; font-weight:normal;\">\n                Your Property Enquiry\n              </h2>\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n                <tr>\n                  <td class=\"detail-label\" width=\"35%\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Property Types\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7;\">\n                    {{ String($('Switch').item.json.buildingTypes || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Location\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ String($('Switch').item.json.location || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Budget\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ (() => {\n                      const value = $('Switch').item.json.budget;\n                      if (value === undefined || value === null || String(value).trim() === '') return 'Not specified';\n                      const amount = Number(String(value).replace(/[^0-9.-]/g, ''));\n                      return Number.isFinite(amount)\n                        ? 'CAD $' + amount.toLocaleString('en-CA', { maximumFractionDigits: 2 })\n                        : String(value);\n                    })() }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px; vertical-align:top;\">\n                    Special Request\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7; overflow-wrap:anywhere;\">\n                    {{ String($('Switch').item.json.specialRequest || 'No additional requirements provided.').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\r\\n|\\r|\\n/g, '<br>') }}\n                  </td>\n                </tr>\n\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Confirmation -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 32px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0; border:1px solid #E9E2D4;\">\n                <tr>\n                  <td style=\"padding:22px 22px;\">\n\n                    <h3 style=\"margin:0 0 10px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:19px; font-weight:normal;\">\n                      Please Confirm Your Availability\n                    </h3>\n\n                    <p style=\"margin:0; color:#534F46; font-size:13px; line-height:1.8;\">\n                      Kindly respond to the calendar invitation with <strong>Yes</strong>, <strong>No</strong> or <strong>Maybe</strong> to let us know whether the scheduled appointment works for you.\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Closing -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 35px;\">\n\n              <p style=\"margin:0 0 17px; color:#534F46; font-size:14px; line-height:1.8;\">\n                We look forward to assisting you with your property search.\n              </p>\n\n              <p style=\"margin:0 0 5px; color:#878276; font-size:13px;\">\n                Kind regards,\n              </p>\n\n              <p style=\"margin:0; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:20px;\">\n                Ramona's Home\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td align=\"center\" style=\"padding:29px 22px; background-color:#151513;\">\n\n              <p style=\"margin:0 0 13px; color:#FCF0D8; font-size:10px; font-weight:bold; letter-spacing:3px;\">\n                RAMONA'S HOME\n              </p>\n\n              <p style=\"margin:0 0 17px; color:#D2C9B7; font-size:12px; line-height:1.7;\">\n                Have a question about your appointment?\n              </p>\n\n              <p style=\"margin:0 0 13px; font-size:13px;\">\n                <a href=\"tel:+1457567679\" style=\"color:#FADF1E; text-decoration:none;\">\n                  +1 4575 676 79\n                </a>\n              </p>\n\n              <p style=\"margin:0 0 20px; font-size:13px;\">\n                <a href=\"https://ramonashome.pages.dev/\" target=\"_blank\" style=\"color:#FCF0D8; text-decoration:underline;\">\n                  Visit Our Website\n                </a>\n              </p>\n\n              <table role=\"presentation\" width=\"240\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td height=\"1\" style=\"height:1px; background-color:#534F46; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <p style=\"margin:17px 0 0; color:#878276; font-size:10px; line-height:1.7;\">\n                © Ramona's Home. All rights reserved.\n              </p>\n\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2032,
+        -144
+      ],
+      "id": "c432b131-cafe-4dd7-81f5-90875f0c5cee",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "tobiadewole43@gmail.com",
+          "mode": "list",
+          "cachedResultName": "tobiadewole43@gmail.com"
+        },
+        "start": "={{ $('Switch').item.json.viewingDateTime }}",
+        "end": "={{ $('Switch').item.json.endTime }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.email }} , shileadewole@gmail.com"
+          ],
+          "color": "1",
+          "description": "={{\n`Good day ${$json.fullName},\n\nYour property viewing appointment with Ramona's House is scheduled as follows:\n\nProperty Types: ${$('Switch').item.json.buildingTypes}\nLocation: ${$json.location}\nBudget: ${$json.budget ? 'CAD $' + Number($json.budget).toLocaleString('en-CA') : 'Not specified'}\nAdditional Requirements: ${$json.moreRequests || 'None provided'}\n\nPlease review the appointment details and confirm your availability by responding Yes, No or Maybe.\n\nWe look forward to assisting you.\n\nRamona's House`\n}}",
+          "location": "={{ $json.location }}",
+          "sendUpdates": "all",
+          "summary": "={{ `Property Viewing – ${$json.fullName} | ${$('Switch').item.json.buildingTypes} | ${$json.location}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        1808,
+        -144
+      ],
+      "id": "ce8ce906-dfc6-412d-9fa0-fbf508a83f02",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}, shileadewole@gmail.com",
+        "subject": "={{ $json.subjectline }}",
+        "message": "={{ $json.emailbody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Emily from Ramona's Team"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2256,
+        -144
+      ],
+      "id": "8647b3a4-0556-4a1a-a678-a01d23c9c1ce",
+      "name": "Send a message1",
+      "webhookId": "6414844f-87cd-44e7-9c38-7e27befe8493",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EUNrmnQq172EURzU",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook1": [
+      {
+        "headers": {
+          "host": "n8n.trusevo.com",
+          "user-agent": "Go-http-client/2.0",
+          "content-length": "345",
+          "accept": "application/json",
+          "accept-encoding": "gzip, br",
+          "cdn-loop": "cloudflare; loops=1; subreqs=1",
+          "cf-connecting-ip": "2a06:98c0:3600::103",
+          "cf-ew-via": "15",
+          "cf-ipcountry": "NG",
+          "cf-ray": "a5fb52fd0c9ab1aa-CDG",
+          "cf-visitor": "{\"scheme\":\"https\"}",
+          "cf-warp-tag-id": "a2eebaf8-c31e-4ded-bea5-9a14311eadac",
+          "cf-worker": "ramonashome.pages.dev",
+          "connection": "keep-alive",
+          "content-type": "application/json",
+          "x-forwarded-for": "2a06:98c0:3600::103",
+          "x-forwarded-proto": "https"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "fullName": "Temi Ajade",
+          "email": "tobiadewole43@gmail.com",
+          "phone": "+1 (070) 469-1832",
+          "buildingTypes": [
+            "Plexes",
+            "Laneway Houses & Garden Suites"
+          ],
+          "viewingDateTime": "2026-12-04T11:00:00-07:00",
+          "budget": 50000000,
+          "location": "Vancouver",
+          "moreRequests": "",
+          "propertyId": null,
+          "propertyName": null,
+          "propertyCategory": null,
+          "timezone": "America/Vancouver"
+        },
+        "webhookUrl": "http://localhost:5678/webhook/5dcfda12-4cf2-419b-8dc5-c00fa9dc350a",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a6d458fa1fc19eee36f7a684e17ae70f400ab525199e53377eda66828191c2f5"
+  }
+}

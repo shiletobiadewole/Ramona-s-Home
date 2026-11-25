@@ -23,8 +23,16 @@ function isLocalhostUrl(rawUrl: string): boolean {
   }
 }
 
-function isHtmlDocument(rawBody: string): boolean {
-  return /^<(?:!doctype|html|head|body)\b/i.test(rawBody.trim());
+function isSpaShellHtml(rawBody: string): boolean {
+  const trimmed = rawBody.trim();
+  if (!/^<(?:!doctype|html)\b/i.test(trimmed)) {
+    return false;
+  }
+  return (
+    /<div\s+id=["']root["']/i.test(trimmed) &&
+    (/(?:\/src\/main\.tsx|\/assets\/index-)/i.test(trimmed) ||
+      /Ramona's Home — Modern Architectural Living/i.test(trimmed))
+  );
 }
 
 export async function submitViewingRequest(
@@ -54,7 +62,7 @@ export async function submitViewingRequest(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json',
+        Accept: 'application/json, text/html, text/plain',
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -62,14 +70,17 @@ export async function submitViewingRequest(
 
     const rawText = await proxyResponse.text();
     const proxyContentType = proxyResponse.headers.get('content-type') || '';
+    const hasViewingProxyHeader =
+      proxyResponse.headers.get('x-viewing-proxy') === '1';
 
-    // Static SPA hosts without /api/viewing-request return 404/405 or an HTML index.html shell.
-    // Note: n8n Respond With: Text defaults to Content-Type: text/html with plain-text body,
-    // so we check that the body is actually an HTML document before treating it as a missing proxy.
+    // Static SPA hosts without /api/viewing-request return 404/405 or the Vite index.html shell.
+    // Checking both the X-Viewing-Proxy header and SPA shell markers ensures n8n HTML notifications
+    // are never mistaken for a missing proxy route.
     const isMissingProxyRoute =
-      proxyResponse.status === 404 ||
-      proxyResponse.status === 405 ||
-      (proxyContentType.includes('text/html') && isHtmlDocument(rawText));
+      !hasViewingProxyHeader &&
+      (proxyResponse.status === 404 ||
+        proxyResponse.status === 405 ||
+        (proxyContentType.includes('text/html') && isSpaShellHtml(rawText)));
 
     const shouldFallbackToLocalBrowser =
       proxyResponse.status === 502 &&
@@ -96,7 +107,7 @@ export async function submitViewingRequest(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
+          Accept: 'application/json, text/html, text/plain',
         },
         body: JSON.stringify(payload),
         signal: controller.signal,

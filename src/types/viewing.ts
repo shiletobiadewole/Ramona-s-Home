@@ -86,6 +86,7 @@ export interface UnavailableResponse {
   status: 'unavailable';
   message: string;
   availableSlots: AvailableSlot[];
+  html?: string;
 }
 
 export interface SuccessResponse {
@@ -93,6 +94,7 @@ export interface SuccessResponse {
   message: string;
   reference?: string;
   confirmation?: string;
+  html?: string;
 }
 
 export type WebhookErrorCode =

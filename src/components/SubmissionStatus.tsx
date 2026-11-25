@@ -1,6 +1,7 @@
 import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { ErrorResponse, SuccessResponse } from '../types/viewing';
+import { SafeHtmlRenderer } from './SafeHtmlRenderer';
 
 interface SubmissionStatusProps {
   success?: SuccessResponse | null;
@@ -34,6 +35,8 @@ export function SubmissionStatus({
             </h2>
           </div>
         </div>
+
+        {success.html && <SafeHtmlRenderer html={success.html} />}
 
         {(success.reference || success.confirmation) && (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-[#B6AF9D]/50">

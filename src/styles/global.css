@@ -42,6 +42,25 @@
   }
 }
 
+@keyframes viewing-alert-flash {
+  0%, 100% {
+    border-color: #57482D;
+    box-shadow: 0 0 0 0 rgba(250, 223, 30, 0);
+  }
+  25%, 75% {
+    border-color: #FADF1E;
+    box-shadow: 0 0 0 4px rgba(250, 223, 30, 0.45);
+  }
+  50% {
+    border-color: #57482D;
+    box-shadow: 0 0 0 2px rgba(87, 72, 45, 0.25);
+  }
+}
+
+.animate-viewing-alert {
+  animation: viewing-alert-flash 1.4s ease-in-out 3;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

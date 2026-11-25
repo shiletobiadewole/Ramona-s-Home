@@ -63,6 +63,7 @@ export function ViewingForm({
 
   const [unavailableResponse, setUnavailableResponse] =
     useState<UnavailableResponse | null>(null);
+  const [notificationRevision, setNotificationRevision] = useState(0);
   const [selectedSlotDateTime, setSelectedSlotDateTime] = useState<string | null>(
     null
   );
@@ -216,6 +217,7 @@ export function ViewingForm({
       setValues(createInitialValues(initialPropertyContext));
     } else if (result.status === 'unavailable') {
       setUnavailableResponse(result);
+      setNotificationRevision((prev) => prev + 1);
       setSuccessResponse(null);
       setSelectedSlotDateTime(null);
     } else {
@@ -321,10 +323,15 @@ export function ViewingForm({
 
         {unavailableResponse && (
           <AvailabilitySlots
+            key={notificationRevision}
             response={unavailableResponse}
             selectedSlotDateTime={selectedSlotDateTime}
             onSelectSlot={handleSelectAlternativeSlot}
             onConfirmSelectedSlot={handleConfirmAlternative}
+            onDismiss={() => {
+              setUnavailableResponse(null);
+              setSelectedSlotDateTime(null);
+            }}
             isSubmitting={isSubmitting}
           />
         )}
