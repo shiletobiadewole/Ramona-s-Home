@@ -38,7 +38,10 @@ export function SubmissionStatus({
 
         {success.html && <SafeHtmlRenderer html={success.html} />}
 
-        {(success.reference || success.confirmation) && (
+        {(success.reference ||
+          success.confirmation ||
+          success.date ||
+          success.time) && (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-[#B6AF9D]/50">
             {success.reference && (
               <div>
@@ -50,12 +53,22 @@ export function SubmissionStatus({
                 </dd>
               </div>
             )}
-            {success.confirmation && (
+            {(success.date || success.time) && (
               <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-[#534F46]">
+                  Scheduled Appointment
+                </dt>
+                <dd className="mt-1.5 text-sm font-medium text-[#151513]">
+                  {[success.date, success.time].filter(Boolean).join(' · ')}
+                </dd>
+              </div>
+            )}
+            {success.confirmation && (
+              <div className="sm:col-span-2">
                 <dt className="text-xs font-medium uppercase tracking-wider text-[#534F46]">
                   Confirmation Details
                 </dt>
-                <dd className="mt-1.5 text-sm leading-relaxed text-[#151513]">
+                <dd className="mt-1.5 text-sm leading-relaxed text-[#151513] whitespace-pre-line">
                   {success.confirmation}
                 </dd>
               </div>

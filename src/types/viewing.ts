@@ -94,6 +94,8 @@ export interface SuccessResponse {
   message: string;
   reference?: string;
   confirmation?: string;
+  date?: string;
+  time?: string;
   html?: string;
 }
 

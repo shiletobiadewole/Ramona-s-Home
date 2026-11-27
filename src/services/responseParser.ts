@@ -398,7 +398,12 @@ export function parseWebhookResponse(
     return result;
   }
 
-  if (rawStatus === 'success') {
+  const isExplicitSuccess =
+    rawStatus === 'success' ||
+    rawStatus === 'confirmed' ||
+    (rawStatus === undefined && parsed.success === true);
+
+  if (isExplicitSuccess) {
     if (!httpOk) {
       return {
         status: 'error',
@@ -406,17 +411,19 @@ export function parseWebhookResponse(
         message: `Viewing service returned HTTP ${httpStatus} alongside success status.`,
       };
     }
-    const successMessage = isNonEmptyString(parsed.message)
-      ? parsed.message.trim()
-      : rawHtml
-      ? extractPlainTextFromHtml(rawHtml)
-      : '';
+
+    const titleText = isNonEmptyString(parsed.title) ? parsed.title.trim() : '';
+    const bodyText = isNonEmptyString(parsed.message) ? parsed.message.trim() : '';
+    const htmlSummary = rawHtml ? extractPlainTextFromHtml(rawHtml) : '';
+
+    const successMessage = titleText || bodyText || htmlSummary;
     if (!successMessage) {
       return buildSchemaMismatchError(
         'Success response is missing a required "message" string.',
         rawBody
       );
     }
+
     if (
       parsed.reference !== undefined &&
       parsed.reference !== null &&
@@ -438,15 +445,24 @@ export function parseWebhookResponse(
       );
     }
 
+    const confirmationParts: string[] = [];
+    if (titleText && bodyText && bodyText !== titleText) {
+      confirmationParts.push(bodyText);
+    }
+    if (isNonEmptyString(parsed.confirmation)) {
+      confirmationParts.push(parsed.confirmation.trim());
+    }
+    const combinedConfirmation = confirmationParts.join('\n\n');
+
     const result: SuccessResponse = {
       status: 'success',
       message: successMessage,
       ...(isNonEmptyString(parsed.reference)
         ? { reference: parsed.reference.trim() }
         : {}),
-      ...(isNonEmptyString(parsed.confirmation)
-        ? { confirmation: parsed.confirmation.trim() }
-        : {}),
+      ...(combinedConfirmation ? { confirmation: combinedConfirmation } : {}),
+      ...(isNonEmptyString(parsed.date) ? { date: parsed.date.trim() } : {}),
+      ...(isNonEmptyString(parsed.time) ? { time: parsed.time.trim() } : {}),
       ...(rawHtml ? { html: rawHtml } : {}),
     };
     return result;
