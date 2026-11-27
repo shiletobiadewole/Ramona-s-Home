@@ -131,6 +131,7 @@ export function Footer() {
             Architectural study previews shown; active availability is confirmed upon
             viewing request.
           </p>
+          <p>Made by Tobi</p>
         </div>
       </div>
     </footer>
