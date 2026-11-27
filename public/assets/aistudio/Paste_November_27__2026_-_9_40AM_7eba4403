@@ -1,0 +1,1640 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5dcfda12-4cf2-419b-8dc5-c00fa9dc350a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "20c872c0-2566-479b-b38e-a10c1e31943d",
+      "name": "Webhook1",
+      "webhookId": "5dcfda12-4cf2-419b-8dc5-c00fa9dc350a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.Message }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "https://ramonashome.pages.dev"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "98986804-da35-4711-a8c6-62258ef0ac98",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9ec57fa4-5edb-4c04-b470-adf9919d4361",
+              "name": "fullName",
+              "value": "={{ String($json.body.fullName || '').trim().toLowerCase().replace(/(^|[\\s'-])\\p{L}/gu, match => match.toUpperCase()) }}",
+              "type": "string"
+            },
+            {
+              "id": "e72cfa37-ef50-407d-a0fb-51b9d67838a5",
+              "name": "email",
+              "value": "={{ String($json.body.email || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "97530217-156a-404b-9d7b-f7bc2645e0c3",
+              "name": "phone",
+              "value": "={{ String($json.body.phone || '').trim().replace(/[^\\d+]/g, '').replace(/(?!^)\\+/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "4934c81c-9a07-4779-a3a8-5c07e0fe7865",
+              "name": "buildingTypes",
+              "value": "={{ Array.isArray($json.body.buildingTypes) ? $json.body.buildingTypes.map(item => String(item).trim()).filter(Boolean).join(' and ') : String($json.body.buildingTypes || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "92966324-46f5-4ebf-9e88-94c4922f9030",
+              "name": "viewingDateTime",
+              "value": "={{ $json.body.viewingDateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "14808a55-892b-469d-b5c7-58334367ae20",
+              "name": "budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "number"
+            },
+            {
+              "id": "fa50ead5-ce3f-4440-9e0c-819cdc0d13fa",
+              "name": "location",
+              "value": "={{ $json.body.location }}",
+              "type": "string"
+            },
+            {
+              "id": "ae4276d3-6017-4ce5-b901-5630e9367886",
+              "name": "moreRequests",
+              "value": "={{ (String($json.body.moreRequests || '').trim() ? String($json.body.moreRequests).trim().toLowerCase().replace(/\\b[a-z]/g, char => char.toUpperCase()) + '.' : '') + '\\n\\nYou can also email us at enquiry@ramonashouse.com for more information.' }}",
+              "type": "string"
+            },
+            {
+              "id": "37ec1f83-1aa5-4233-8045-59681f4164a1",
+              "name": "timezone",
+              "value": "={{ $json.body.timezone }}",
+              "type": "string"
+            },
+            {
+              "id": "7f7d19f1-1a5e-46ec-b443-b9a648ab881a",
+              "name": "time submitted",
+              "value": "={{ $now.setZone($json.body.timezone || 'America/Toronto').toFormat('dd/MM/yyyy HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "5a5d062e-5d79-4d6c-a2a0-ea10b59ef4a1",
+              "name": "viewing time",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).toFormat('hh:mm a') }}",
+              "type": "string"
+            },
+            {
+              "id": "e126f76b-6287-4572-a9bf-a7a4f845aa59",
+              "name": "viewing date",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).toFormat('dd/MM/yyyy') }}",
+              "type": "string"
+            },
+            {
+              "id": "79a89952-4ada-4247-9d1a-dd7f83aecb44",
+              "name": "endTime",
+              "value": "={{ DateTime.fromISO($json.body.viewingDateTime, { setZone: true }).plus({ hours: 2 }).toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        240,
+        -112
+      ],
+      "id": "ecdf5bcd-6be5-4854-ba31-d4ac09cef429",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "shileadewole@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shileadewole@gmail.com"
+        },
+        "timeMin": "={{ $json.viewingDateTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        -112
+      ],
+      "id": "dad720e5-dd9c-4f37-986d-78f7279ee88f",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n/**\n * RAMONA'S HOME\n * Lead Qualification & Appointment Availability Engine\n *\n * FEATURES:\n * 1. Hot, Warm and Cold lead classification\n * 2. Special request financial normalization\n * 3. Accepts combined or separate viewing date/time fields\n * 4. Two-hour appointment availability checking\n * 5. Five nearest alternative appointment suggestions\n * 6. Website success and alternative-time response messages\n *\n * INPUT:\n * Edit Fields + Google Calendar Get Many Events\n *\n * MODE:\n * Run Once for All Items\n */\n\n// ==========================================\n// 1. CONFIGURATION\n// ==========================================\n\nconst customer = $('Edit Fields').first().json;\n\nconst CONFIG = {\n  meetingDurationHours: 2,\n\n  currency: 'CAD',\n\n  timezone: customer.timezone || 'America/Toronto',\n\n  minimumBudget: 5000000,\n  hotBudget: 50000000,\n  warmBudget: 10000000,\n\n  workingHours: {\n    start: 9,\n    end: 17\n  },\n\n  workingDays: [1, 2, 3, 4, 5],\n\n  slotIntervalMinutes: 30,\n\n  alternativesRequired: 5,\n\n  searchDaysBefore: 30,\n  searchDaysAfter: 30\n};\n\nconst calendarItems = $input.all();\n\nconst now = new Date();\n\n\n// ==========================================\n// 2. TIMEZONE UTILITIES\n// ==========================================\n\nfunction getLocalParts(date, timezone) {\n\n  const formatter = new Intl.DateTimeFormat('en-CA', {\n    timeZone: timezone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    weekday: 'short',\n    hourCycle: 'h23'\n  });\n\n  const parts = formatter.formatToParts(date);\n\n  const result = {};\n\n  for (const part of parts) {\n    if (part.type !== 'literal') {\n      result[part.type] = part.value;\n    }\n  }\n\n  return result;\n}\n\n\n// Convert local date/time to UTC using the selected timezone.\n\nfunction localToUTC(year, month, day, hour, minute, timezone) {\n\n  const target = Date.UTC(\n    year,\n    month - 1,\n    day,\n    hour,\n    minute,\n    0\n  );\n\n  let timestamp = target;\n\n  for (let i = 0; i < 3; i++) {\n\n    const parts = getLocalParts(\n      new Date(timestamp),\n      timezone\n    );\n\n    const represented = Date.UTC(\n      Number(parts.year),\n      Number(parts.month) - 1,\n      Number(parts.day),\n      Number(parts.hour),\n      Number(parts.minute),\n      Number(parts.second)\n    );\n\n    timestamp += target - represented;\n  }\n\n  const check = getLocalParts(\n    new Date(timestamp),\n    timezone\n  );\n\n  if (\n    Number(check.year) !== year ||\n    Number(check.month) !== month ||\n    Number(check.day) !== day ||\n    Number(check.hour) !== hour ||\n    Number(check.minute) !== minute\n  ) {\n    throw new Error(\n      'Invalid or ambiguous local appointment time. Please select another time.'\n    );\n  }\n\n  return new Date(timestamp);\n}\n\n\n// ==========================================\n// 3. RETRIEVE AND VALIDATE DATE/TIME\n// ==========================================\n\n// Supports:\n// viewingDateTime: 2026-12-04T11:00:00-05:00\n//\n// OR separate fields:\n// viewingDate: 2026-12-04\n// viewingTime: 11:00 AM\n//\n// Also supports:\n// viewing date / viewing time\n\nlet requestedStart;\n\nconst combinedDateTime = customer.viewingDateTime;\n\nif (combinedDateTime) {\n\n  requestedStart = new Date(combinedDateTime);\n\n} else {\n\n  const viewingDate =\n    customer.viewingDate ||\n    customer['viewing date'];\n\n  const viewingTime =\n    customer.viewingTime ||\n    customer['viewing time'];\n\n  if (!viewingDate || !viewingTime) {\n    throw new Error(\n      'Missing viewing date or viewing time.'\n    );\n  }\n\n  let year;\n  let month;\n  let day;\n\n  const dateString = String(viewingDate).trim();\n\n  // YYYY-MM-DD format\n\n  const isoDate = dateString.match(\n    /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/\n  );\n\n  // DD/MM/YYYY format\n\n  const canadianDate = dateString.match(\n    /^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/\n  );\n\n  if (isoDate) {\n\n    year = Number(isoDate[1]);\n    month = Number(isoDate[2]);\n    day = Number(isoDate[3]);\n\n  } else if (canadianDate) {\n\n    day = Number(canadianDate[1]);\n    month = Number(canadianDate[2]);\n    year = Number(canadianDate[3]);\n\n  } else {\n\n    throw new Error(\n      'Invalid viewing date. Use YYYY-MM-DD or DD/MM/YYYY.'\n    );\n\n  }\n\n  const timeMatch = String(viewingTime).trim().match(\n    /^(\\d{1,2}):(\\d{2})(?:\\s*(AM|PM))?$/i\n  );\n\n  if (!timeMatch) {\n    throw new Error(\n      'Invalid viewing time. Use HH:mm or h:mm AM/PM.'\n    );\n  }\n\n  let hour = Number(timeMatch[1]);\n  const minute = Number(timeMatch[2]);\n\n  const period = timeMatch[3]?.toUpperCase();\n\n  if (period === 'PM' && hour !== 12) {\n    hour += 12;\n  }\n\n  if (period === 'AM' && hour === 12) {\n    hour = 0;\n  }\n\n  if (\n    month < 1 ||\n    month > 12 ||\n    day < 1 ||\n    day > 31 ||\n    hour < 0 ||\n    hour > 23 ||\n    minute < 0 ||\n    minute > 59\n  ) {\n    throw new Error(\n      'Invalid viewing date or time.'\n    );\n  }\n\n  requestedStart = localToUTC(\n    year,\n    month,\n    day,\n    hour,\n    minute,\n    CONFIG.timezone\n  );\n}\n\nif (\n  !requestedStart ||\n  isNaN(requestedStart.getTime())\n) {\n  throw new Error(\n    'Invalid viewing date and time supplied.'\n  );\n}\n\n\n// Calculate the two-hour appointment end time.\n\nconst requestedEnd = new Date(\n  requestedStart.getTime() +\n  CONFIG.meetingDurationHours * 60 * 60 * 1000\n);\n\nconst requestedStartMs = requestedStart.getTime();\nconst requestedEndMs = requestedEnd.getTime();\n\n\n// ==========================================\n// 4. LEAD QUALIFICATION\n// ==========================================\n\nconst budget = Number(customer.budget || 0);\n\nif (!Number.isFinite(budget) || budget < 0) {\n  throw new Error('Invalid customer budget.');\n}\n\n// Default category for leads that do not meet\n// the specific Hot or Cold conditions.\n\nlet leadCategory = 'Warm lead';\n\nconst viewingLocal = getLocalParts(\n  requestedStart,\n  CONFIG.timezone\n);\n\nconst todayLocal = getLocalParts(\n  now,\n  CONFIG.timezone\n);\n\nconst viewingDay = Date.UTC(\n  Number(viewingLocal.year),\n  Number(viewingLocal.month) - 1,\n  Number(viewingLocal.day)\n);\n\nconst todayDay = Date.UTC(\n  Number(todayLocal.year),\n  Number(todayLocal.month) - 1,\n  Number(todayLocal.day)\n);\n\nconst daysUntilViewing = Math.round(\n  (viewingDay - todayDay) / 86400000\n);\n\n\n// Cold: Budget below CAD $5 million.\n\nif (budget < CONFIG.minimumBudget) {\n\n  leadCategory = 'Cold lead';\n\n}\n\n// Hot: Budget CAD $50 million or above,\n// viewing in 1–14 days.\n\nelse if (\n  budget >= CONFIG.hotBudget &&\n  daysUntilViewing >= 1 &&\n  daysUntilViewing <= 14\n) {\n\n  leadCategory = 'Hot lead';\n\n}\n\n// Warm: CAD $5 million to below $50 million,\n// viewing in 21–28 days.\n\nelse if (\n  budget >= CONFIG.minimumBudget &&\n  budget < CONFIG.hotBudget &&\n  daysUntilViewing >= 21 &&\n  daysUntilViewing <= 28\n) {\n\n  leadCategory = 'Warm lead';\n\n}\n\n// Additional Warm rule:\n// Budget of at least CAD $10 million and\n// viewing within one day or 21 days and beyond.\n\nelse if (\n  budget >= CONFIG.warmBudget &&\n  (\n    daysUntilViewing <= 1 ||\n    daysUntilViewing >= 21\n  )\n) {\n\n  leadCategory = 'Warm lead';\n\n}\n\n\n// ==========================================\n// 5. SPECIAL REQUEST NORMALIZATION\n// ==========================================\n\nlet specialRequest = String(\n  customer.moreRequests || ''\n).trim();\n\nspecialRequest = specialRequest.replace(\n  /\\b(\\d+(?:\\.\\d+)?)\\s*([kmb])(?:\\s*CAD)?\\b/gi,\n  (match, amount, suffix) => {\n\n    const multipliers = {\n      k: 1000,\n      m: 1000000,\n      b: 1000000000\n    };\n\n    const normalizedAmount =\n      Number(amount) *\n      multipliers[suffix.toLowerCase()];\n\n    return `${Number(normalizedAmount.toFixed(2))} CAD`;\n  }\n);\n\n\n// ==========================================\n// 6. GOOGLE CALENDAR EVENT PROCESSING\n// ==========================================\n\n// Ignore empty outputs and cancelled events.\n\nconst events = calendarItems\n  .map(item => item.json)\n  .filter(event =>\n    event &&\n    event.start &&\n    event.end &&\n    event.status !== 'cancelled'\n  );\n\n\n// Process timed and all-day events.\n\nfunction getEventRange(event) {\n\n  let start;\n  let end;\n\n  if (event.start.dateTime && event.end.dateTime) {\n\n    start = new Date(event.start.dateTime);\n    end = new Date(event.end.dateTime);\n\n  } else if (event.start.date && event.end.date) {\n\n    const [sy, sm, sd] = event.start.date\n      .split('-')\n      .map(Number);\n\n    const [ey, em, ed] = event.end.date\n      .split('-')\n      .map(Number);\n\n    start = localToUTC(\n      sy, sm, sd, 0, 0, CONFIG.timezone\n    );\n\n    end = localToUTC(\n      ey, em, ed, 0, 0, CONFIG.timezone\n    );\n\n  } else {\n\n    return null;\n\n  }\n\n  if (\n    isNaN(start.getTime()) ||\n    isNaN(end.getTime()) ||\n    end <= start\n  ) {\n    return null;\n  }\n\n  return {\n    start: start.getTime(),\n    end: end.getTime()\n  };\n}\n\nconst busyEvents = events\n  .map(getEventRange)\n  .filter(Boolean);\n\n\n// ==========================================\n// 7. APPOINTMENT OVERLAP CHECK\n// ==========================================\n\nfunction isOverlapping(start, end, event) {\n\n  return (\n    start < event.end &&\n    end > event.start\n  );\n\n}\n\nconst isBooked = busyEvents.some(event =>\n  isOverlapping(\n    requestedStartMs,\n    requestedEndMs,\n    event\n  )\n);\n\nlet appointmentStatus;\n\nlet availableSlots = [];\n\n\n// ==========================================\n// 8. FIND FIVE NEAREST AVAILABLE SLOTS\n// ==========================================\n\nif (!isBooked) {\n\n  appointmentStatus = 'Available Slot';\n\n} else {\n\n  appointmentStatus =\n    'Booked - Alternative Slots Found';\n\n  const localDate = new Date(Date.UTC(\n    Number(viewingLocal.year),\n    Number(viewingLocal.month) - 1,\n    Number(viewingLocal.day)\n  ));\n\n  const candidates = [];\n\n  for (\n    let offset = -CONFIG.searchDaysBefore;\n    offset <= CONFIG.searchDaysAfter;\n    offset++\n  ) {\n\n    const day = new Date(localDate);\n\n    day.setUTCDate(\n      day.getUTCDate() + offset\n    );\n\n    const year = day.getUTCFullYear();\n    const month = day.getUTCMonth() + 1;\n    const date = day.getUTCDate();\n\n    const weekday = day.getUTCDay();\n\n    if (!CONFIG.workingDays.includes(weekday)) {\n      continue;\n    }\n\n    for (\n      let minutes = CONFIG.workingHours.start * 60;\n      minutes +\n        CONFIG.meetingDurationHours * 60 <=\n        CONFIG.workingHours.end * 60;\n      minutes += CONFIG.slotIntervalMinutes\n    ) {\n\n      const hour = Math.floor(minutes / 60);\n      const minute = minutes % 60;\n\n      const slotStart = localToUTC(\n        year,\n        month,\n        date,\n        hour,\n        minute,\n        CONFIG.timezone\n      );\n\n      const slotEnd = new Date(\n        slotStart.getTime() +\n        CONFIG.meetingDurationHours * 60 * 60 * 1000\n      );\n\n      const startMs = slotStart.getTime();\n      const endMs = slotEnd.getTime();\n\n      // Do not suggest appointments in the past.\n\n      if (startMs <= now.getTime()) {\n        continue;\n      }\n\n      // Exclude the original requested appointment.\n\n      if (startMs === requestedStartMs) {\n        continue;\n      }\n\n      // Exclude occupied appointments.\n\n      const occupied = busyEvents.some(event =>\n        isOverlapping(startMs, endMs, event)\n      );\n\n      if (!occupied) {\n\n        candidates.push({\n          start: slotStart,\n          end: slotEnd,\n          distance: Math.abs(\n            startMs - requestedStartMs\n          )\n        });\n\n      }\n    }\n  }\n\n  // Sort by proximity to the requested date/time.\n\n  candidates.sort((a, b) => {\n\n    if (a.distance !== b.distance) {\n      return a.distance - b.distance;\n    }\n\n    return a.start.getTime() - b.start.getTime();\n\n  });\n\n  availableSlots = candidates\n    .slice(0, CONFIG.alternativesRequired)\n    .map((slot, index) => ({\n\n      option: index + 1,\n\n      startTime: slot.start.toISOString(),\n\n      endTime: slot.end.toISOString(),\n\n      viewingDate: getLocalParts(\n        slot.start,\n        CONFIG.timezone\n      ),\n\n      formattedDate: new Intl.DateTimeFormat(\n        'en-CA',\n        {\n          timeZone: CONFIG.timezone,\n          day: '2-digit',\n          month: 'long',\n          year: 'numeric'\n        }\n      ).format(slot.start),\n\n      formattedTime: new Intl.DateTimeFormat(\n        'en-CA',\n        {\n          timeZone: CONFIG.timezone,\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }\n      ).format(slot.start)\n\n    }));\n\n}\n\n\n// ==========================================\n// 9. FORMAT REQUESTED APPOINTMENT\n// ==========================================\n\nconst formattedRequestedDate = new Intl.DateTimeFormat(\n  'en-CA',\n  {\n    timeZone: CONFIG.timezone,\n    day: '2-digit',\n    month: 'long',\n    year: 'numeric'\n  }\n).format(requestedStart);\n\nconst formattedRequestedTime = new Intl.DateTimeFormat(\n  'en-CA',\n  {\n    timeZone: CONFIG.timezone,\n    hour: '2-digit',\n    minute: '2-digit',\n    hour12: true\n  }\n).format(requestedStart);\n\n\n// ==========================================\n// 10. WEBSITE RESPONSE DATA\n// ==========================================\n\n// This response is prepared for the website.\n// The final success page should be returned by\n// Respond to Webhook AFTER the calendar and Gmail\n// nodes have completed successfully.\n\nlet pageStatus;\nlet pageTitle;\nlet pageMessage;\n\nif (isBooked) {\n\n  pageStatus = 'alternative_required';\n\n  pageTitle = 'Please choose another viewing time';\n\n  pageMessage =\n    'The date and time you selected are unavailable. Please choose one of the alternative viewing times below.';\n\n} else {\n\n  pageStatus = 'ready_for_confirmation';\n\n  pageTitle = 'Your viewing time is available';\n\n  pageMessage =\n    'Your selected viewing date and time are available. Your request is being processed. Check your inbox for both your calendar and email confirmation once your booking is complete.';\n\n}\n\n\n// ==========================================\n// 11. FINAL OUTPUT\n// ==========================================\n\nreturn [\n  {\n    json: {\n\n      // Preserve normalized customer information.\n\n      ...customer,\n\n      // Lead qualification.\n\n      leadCategory,\n\n      daysUntilViewing,\n\n      // Special request.\n\n      specialRequest,\n\n      // Appointment availability.\n\n      appointmentStatus,\n\n      appointmentAvailable: !isBooked,\n\n      requestedAppointment: {\n\n        startTime: requestedStart.toISOString(),\n\n        endTime: requestedEnd.toISOString(),\n\n        durationHours: CONFIG.meetingDurationHours,\n\n        timezone: CONFIG.timezone,\n\n        formattedDate: formattedRequestedDate,\n\n        formattedTime: formattedRequestedTime\n\n      },\n\n      // Website response.\n\n      pageStatus,\n\n      pageTitle,\n\n      pageMessage,\n\n      // Final success message for Respond to Webhook\n      // after Google Calendar and Gmail succeed.\n\n      successTitle: 'Viewing Date Confirmed!',\n\n      successMessage:\n        'Your property viewing has been successfully scheduled. Check your inbox for both your calendar and email confirmation.',\n\n      successDate: formattedRequestedDate,\n\n      successTime: formattedRequestedTime,\n\n      // Alternative appointments.\n\n      availableSlots,\n\n      availableSlotsCount: availableSlots.length,\n\n      // Calendar diagnostics.\n\n      calendarEventsFound: busyEvents.length\n\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -112
+      ],
+      "id": "e7d5fd86-9bea-41fe-8b30-abd2fe5dd9ba",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "8bbaa87b-2c22-47c9-bcc4-2db370bd3c43",
+              "leftValue": "={{ $json.appointmentStatus }}",
+              "rightValue": "Available Slot",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        912,
+        -112
+      ],
+      "id": "0bd0bc0e-8c40-41fe-83ac-b3d6836d0592",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74a5112e-5f66-4826-bc38-c40354422f1f",
+              "name": "Message",
+              "value": "=\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Alternative Viewing Times | Ramona's Home</title>\n\n<style>\n:root {\n  --ivory:#FDFAF0;\n  --cream:#FCF0D8;\n  --black:#151513;\n  --taupe:#534F46;\n  --muted:#878276;\n  --border:#B6AF9D;\n  --bronze:#57482D;\n  --deep:#423620;\n  --warning:#FFF1DF;\n  --warning-text:#8B4C14;\n}\n\n* {\n  box-sizing:border-box;\n  margin:0;\n  padding:0;\n}\n\nbody {\n  background:var(--ivory);\n  color:var(--black);\n  font-family:Arial,Helvetica,sans-serif;\n  line-height:1.6;\n  padding:30px 15px;\n}\n\n.container {\n  max-width:680px;\n  margin:auto;\n  background:white;\n  border:1px solid var(--border);\n  border-radius:15px;\n  overflow:hidden;\n  box-shadow:0 12px 35px rgba(0,0,0,.06);\n}\n\n.header {\n  padding:27px 30px;\n  background:var(--ivory);\n  border-bottom:1px solid #e8e1d4;\n}\n\n.brand {\n  font-family:Georgia,serif;\n  font-size:25px;\n  font-weight:bold;\n  letter-spacing:1px;\n}\n\n.brand span {\n  color:var(--bronze);\n}\n\n.brand-caption {\n  color:var(--muted);\n  font-size:10px;\n  letter-spacing:3px;\n  text-transform:uppercase;\n}\n\n.content {\n  padding:32px 30px;\n}\n\n.warning {\n  display:flex;\n  gap:13px;\n  align-items:flex-start;\n  padding:17px;\n  background:var(--warning);\n  border:1px solid #D99B43;\n  border-left:5px solid #C57B21;\n  border-radius:8px;\n  margin-bottom:26px;\n  animation:pulse 2s infinite;\n}\n\n.warning-icon {\n  background:#F4D4A8;\n  color:var(--warning-text);\n  width:29px;\n  height:29px;\n  min-width:29px;\n  border-radius:50%;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  font-weight:bold;\n}\n\n.warning strong {\n  color:var(--warning-text);\n  display:block;\n  font-size:15px;\n  margin-bottom:3px;\n}\n\n.warning p {\n  color:#75502E;\n  font-size:13px;\n}\n\n@keyframes pulse {\n  50% {\n    box-shadow:0 0 0 5px rgba(217,155,67,.16);\n  }\n}\n\nh1 {\n  font-family:Georgia,serif;\n  font-size:32px;\n  font-weight:normal;\n  line-height:1.2;\n  margin-bottom:12px;\n}\n\n.intro {\n  color:var(--taupe);\n  font-size:14px;\n  margin-bottom:25px;\n}\n\n.requested {\n  background:var(--cream);\n  border:1px solid #e8ddc7;\n  border-radius:9px;\n  padding:19px;\n  margin-bottom:30px;\n}\n\n.label {\n  color:var(--muted);\n  font-size:10px;\n  font-weight:bold;\n  letter-spacing:1.3px;\n  text-transform:uppercase;\n  margin-bottom:6px;\n}\n\n.requested-date {\n  font-weight:bold;\n  font-size:17px;\n}\n\n.requested-time {\n  font-size:14px;\n  color:var(--taupe);\n}\n\nh2 {\n  font-family:Georgia,serif;\n  font-weight:normal;\n  font-size:24px;\n  margin-bottom:7px;\n}\n\n.section-description {\n  color:var(--muted);\n  font-size:13px;\n  margin-bottom:19px;\n}\n\n.slot-list {\n  display:grid;\n  gap:12px;\n  margin-bottom:22px;\n}\n\n.slot {\n  display:flex;\n  align-items:center;\n  gap:13px;\n  border:1px solid var(--border);\n  border-radius:9px;\n  padding:16px;\n  cursor:pointer;\n  transition:.2s;\n}\n\n.slot:hover {\n  background:var(--ivory);\n  border-color:var(--bronze);\n}\n\n.slot:has(input:checked) {\n  border:2px solid var(--bronze);\n  background:#FBF6E9;\n  padding:15px;\n}\n\n.slot input {\n  width:18px;\n  height:18px;\n  accent-color:var(--bronze);\n  flex-shrink:0;\n}\n\n.slot-info {\n  flex:1;\n}\n\n.slot-number {\n  display:block;\n  color:var(--muted);\n  font-size:10px;\n  font-weight:bold;\n  letter-spacing:1px;\n  text-transform:uppercase;\n}\n\n.slot-date {\n  display:block;\n  font-size:15px;\n  font-weight:bold;\n  margin-top:3px;\n}\n\n.slot-time {\n  display:block;\n  font-size:13px;\n  color:var(--taupe);\n}\n\n.available {\n  background:#EDF3E8;\n  color:#47653B;\n  border-radius:20px;\n  padding:5px 9px;\n  font-size:10px;\n  font-weight:bold;\n}\n\n.submit {\n  width:100%;\n  background:var(--bronze);\n  color:white;\n  border:0;\n  padding:16px;\n  border-radius:6px;\n  font-size:13px;\n  font-weight:bold;\n  cursor:pointer;\n}\n\n.submit:hover {\n  background:var(--deep);\n}\n\n.submit:disabled {\n  opacity:.5;\n  cursor:not-allowed;\n}\n\n.notice {\n  color:var(--muted);\n  font-size:11px;\n  text-align:center;\n  margin-top:13px;\n}\n\n.footer {\n  background:var(--ivory);\n  border-top:1px solid #e8e1d4;\n  padding:24px;\n  text-align:center;\n}\n\n.footer-brand {\n  font-family:Georgia,serif;\n  font-size:17px;\n  margin-bottom:7px;\n}\n\n.footer p {\n  color:var(--muted);\n  font-size:11px;\n}\n\n.footer a {\n  color:var(--bronze);\n  text-decoration:none;\n}\n\n.feedback {\n  display:none;\n  padding:14px;\n  border-radius:7px;\n  margin-top:16px;\n  font-size:13px;\n}\n\n.feedback.success {\n  display:block;\n  background:#EDF5E9;\n  color:#315B2B;\n}\n\n.feedback.error {\n  display:block;\n  background:#FCEAEA;\n  color:#8B2929;\n}\n\n@media(max-width:520px) {\n  body {padding:12px 8px;}\n  .header {padding:23px 19px;}\n  .content {padding:25px 19px;}\n  h1 {font-size:28px;}\n  .slot {padding:13px;gap:10px;}\n  .slot:has(input:checked) {padding:12px;}\n}\n\n@media(prefers-reduced-motion:reduce) {\n  .warning {animation:none;}\n}\n</style>\n</head>\n\n<body>\n\n<div class=\"container\">\n\n  <header class=\"header\">\n    <div class=\"brand\">RAMONA'S <span>HOME</span></div>\n    <div class=\"brand-caption\">Find a place to call home</div>\n  </header>\n\n  <main class=\"content\">\n\n    <div class=\"warning\">\n      <div class=\"warning-icon\">!</div>\n      <div>\n        <strong>Your selected viewing time is already booked.</strong>\n        <p>Unfortunately, we cannot accommodate your requested time. However, we've found five alternative viewing times for you.</p>\n      </div>\n    </div>\n\n    <h1>Let's find a time that works for you.</h1>\n\n    <p class=\"intro\">\n      Good day {{ $('Edit Fields').first().json.fullName }},\n      thank you for choosing Ramona's Home. We appreciate your interest and would love to arrange a convenient time for your property viewing. Please choose one of the available alternatives below.\n    </p>\n\n    <div class=\"requested\">\n      <div class=\"label\">Your originally requested appointment</div>\n\n      <div class=\"requested-date\">\n        {{ $('Edit Fields').first().json['viewing date'] }}\n      </div>\n\n      <div class=\"requested-time\">\n        {{ $('Edit Fields').first().json['viewing time'] }}\n      </div>\n    </div>\n\n    <h2>Choose an available viewing time</h2>\n\n    <p class=\"section-description\">\n      We've identified the following five alternative appointments. Select the time that best fits your schedule.\n    </p>\n\n    <form id=\"appointmentForm\">\n\n      <div class=\"slot-list\">\n        {{\n          $('Code in JavaScript').first().json.availableSlots.slice(0,5).map((slot,index) => `\n            <label class=\"slot\">\n              <input type=\"radio\" name=\"selectedSlot\" value=\"${index}\" required>\n\n              <span class=\"slot-info\">\n                <span class=\"slot-number\">Alternative slot ${index + 1}</span>\n                <span class=\"slot-date\">${slot.formattedDate}</span>\n                <span class=\"slot-time\">Time: ${slot.formattedTime}</span>\n              </span>\n\n              <span class=\"available\">AVAILABLE</span>\n            </label>\n          `).join('')\n        }}\n      </div>\n\n      <button type=\"submit\" class=\"submit\" id=\"submitButton\">\n        CONFIRM MY PREFERRED TIME\n      </button>\n\n      <p class=\"notice\">\n        Your selected time will be checked again before your appointment is confirmed.\n      </p>\n\n      <div id=\"feedback\" class=\"feedback\" role=\"status\" aria-live=\"polite\"></div>\n\n    </form>\n\n  </main>\n\n  <footer class=\"footer\">\n    <div class=\"footer-brand\">Ramona's Home</div>\n    <p>We're here to help you find a place to call home.</p>\n\n    <p style=\"margin-top:10px\">\n      <a href=\"https://ramonashome.pages.dev/\">Visit our website</a>\n      &nbsp; | &nbsp;\n      <a href=\"mailto:enquiry@ramonashome.com\">Contact our team</a>\n    </p>\n\n    <p style=\"margin-top:14px\">© 2026 Ramona's Home. All rights reserved.</p>\n  </footer>\n\n</div>\n\n<script>\nconst availableSlots = {{ JSON.stringify(\n  $('Code in JavaScript').first().json.availableSlots.slice(0,5)\n).replace(/</g, '\\\\u003c') }};\n\nconst customer = {\n  fullName: {{ JSON.stringify($('Edit Fields').first().json.fullName) }},\n  email: {{ JSON.stringify($('Edit Fields').first().json.email) }},\n  phone: {{ JSON.stringify($('Edit Fields').first().json.phone) }}\n};\n\nconst timezone = {{ JSON.stringify($('Edit Fields').first().json.timezone || 'America/Vancouver') }};\n\n// Replace this with your second n8n webhook production URL.\nconst submissionWebhook = 'YOUR_SECOND_N8N_WEBHOOK_URL';\n\nconst form = document.getElementById('appointmentForm');\nconst button = document.getElementById('submitButton');\nconst feedback = document.getElementById('feedback');\n\nform.addEventListener('submit', async (event) => {\n  event.preventDefault();\n\n  const selected = document.querySelector(\n    'input[name=\"selectedSlot\"]:checked'\n  );\n\n  if (!selected) {\n    feedback.textContent = 'Please select one of the available appointments.';\n    feedback.className = 'feedback error';\n    return;\n  }\n\n  if (submissionWebhook === 'YOUR_SECOND_N8N_WEBHOOK_URL') {\n    feedback.textContent = 'The appointment submission service has not yet been connected.';\n    feedback.className = 'feedback error';\n    return;\n  }\n\n  const index = Number(selected.value);\n  const slot = availableSlots[index];\n\n  if (!slot || !slot.startTime || !slot.endTime) {\n    feedback.textContent = 'Invalid appointment selection. Please refresh the page.';\n    feedback.className = 'feedback error';\n    return;\n  }\n\n  button.disabled = true;\n  button.textContent = 'SUBMITTING...';\n\n  try {\n    const response = await fetch(submissionWebhook, {\n      method: 'POST',\n      headers: {\n        'Content-Type':'application/json'\n      },\n      body: JSON.stringify({\n        fullName: customer.fullName,\n        email: customer.email,\n        phone: customer.phone,\n        selectedSlotIndex: index,\n        selectedSlotStart: slot.startTime,\n        selectedSlotEnd: slot.endTime,\n        viewingDate: slot.viewingDate,\n        formattedDate: slot.formattedDate,\n        formattedTime: slot.formattedTime,\n        timezone: timezone\n      })\n    });\n\n    if (!response.ok) {\n      throw new Error('Submission failed');\n    }\n\n    feedback.textContent =\n      'Thank you! Your preferred viewing time has been submitted. Our team will verify its availability and contact you with confirmation.';\n\n    feedback.className = 'feedback success';\n    button.textContent = 'SELECTION SUBMITTED';\n\n  } catch (error) {\n    feedback.textContent =\n      'We could not submit your selection. Please try again or contact enquiry@ramonashome.com.';\n\n    feedback.className = 'feedback error';\n    button.disabled = false;\n    button.textContent = 'CONFIRM MY PREFERRED TIME';\n  }\n});\n</script>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1152,
+        176
+      ],
+      "id": "b099e21a-df4a-4233-98ea-4cd6d9361f36",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Hot lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6169b5ca-e96a-44ec-a77a-be61afcb7fcb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "13716639-29c5-4fd8-865c-3eb30691d26a",
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Warm lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "167a5525-1132-4bd2-9872-ed53ed460382",
+                    "leftValue": "={{ $json.leadCategory }}",
+                    "rightValue": "Cold lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold lead"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        1136,
+        -320
+      ],
+      "id": "2eb2b313-3e2e-4dc0-8ac3-4806ce774c5b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hot lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "email": "={{ $json.email }}",
+            "fullName": "={{ $json.fullName }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}",
+            "availableSlotsCount": "={{ $json.availableSlotsCount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
+        -496
+      ],
+      "id": "fadf3ee7-a4d1-41ba-891c-c5700d9a4373",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 869521312,
+          "mode": "list",
+          "cachedResultName": "Warm lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=869521312"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "fullName": "={{ $json.fullName }}",
+            "email": "={{ $json.email }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
+        -304
+      ],
+      "id": "2b29bc20-7f77-4236-9cb0-7f6cb455be64",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8",
+          "mode": "list",
+          "cachedResultName": "Appointment Scheduling TEST",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 103751116,
+          "mode": "list",
+          "cachedResultName": "Cold lead",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBMn94kSBcrGL8qztDacUgvg2cYS0uigKHm_on9Kq_8/edit#gid=103751116"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time submitted": "={{ $json['time submitted'] }}",
+            "email": "={{ $json.email }}",
+            "fullName": "={{ $json.fullName }}",
+            "phone": "={{ $json.phone }}",
+            "buildingTypes": "={{ $json.buildingTypes }}",
+            "budget": "={{ $json.budget }}",
+            "location": "={{ $json.location }}",
+            "viewing time": "={{ $json['viewing time'] }}",
+            "viewing date": "={{ $json['viewing date'] }}",
+            "endTime": "={{ $json.endTime }}",
+            "leadCategory": "={{ $json.leadCategory }}",
+            "daysUntilViewing": "={{ $json.daysUntilViewing }}",
+            "specialRequest": "={{ $json.specialRequest }}",
+            "appointmentStatus": "={{ $json.appointmentStatus }}",
+            "availableSlots": "={{\n  $json.availableSlots.length\n    ? $json.availableSlots.map(slot =>\n        `Option ${slot.option}: ${slot.formattedDate}, ${slot.formattedTime} - ${new Intl.DateTimeFormat('en-CA', {\n          timeZone: $json.timezone || 'America/Toronto',\n          hour: '2-digit',\n          minute: '2-digit',\n          hour12: true\n        }).format(new Date(slot.endTime))}`\n      ).join('\\n')\n    : 'No alternative appointments available'\n}}",
+            "availableSlotsCount": "={{ $json.availableSlotsCount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time submitted",
+              "displayName": "time submitted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "buildingTypes",
+              "displayName": "buildingTypes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "specialRequest",
+              "displayName": "specialRequest",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing time",
+              "displayName": "viewing time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "viewing date",
+              "displayName": "viewing date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leadCategory",
+              "displayName": "leadCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "daysUntilViewing",
+              "displayName": "daysUntilViewing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointmentStatus",
+              "displayName": "appointmentStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlots",
+              "displayName": "availableSlots",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "availableSlotsCount",
+              "displayName": "availableSlotsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
+        -112
+      ],
+      "id": "090b2d3d-4234-427a-9173-4db4e1c6ff62",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JCDrVbVQAIVRGZoM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a53ac292-b949-4a86-a643-16dec4fd3a83",
+              "name": "email",
+              "value": "={{ $('Switch').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "fc8fc671-099d-4305-9f9f-70e5906e637d",
+              "name": "subjectline",
+              "value": "=Confirmation of Viewing for {{ $('Switch').item.json.buildingTypes }} - {{ $('Switch').item.json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "76273c4a-52cb-410d-a622-49dc41ca3085",
+              "name": "emailbody",
+              "value": "=\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta name=\"color-scheme\" content=\"light\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>Viewing Appointment | Ramona's Home</title>\n\n  <style>\n    body {\n      margin: 0 !important;\n      padding: 0 !important;\n      background-color: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      -webkit-text-size-adjust: 100%;\n    }\n\n    table {\n      border-spacing: 0;\n      border-collapse: collapse;\n    }\n\n    img {\n      border: 0;\n      display: block;\n    }\n\n    a {\n      color: #57482D;\n    }\n\n    @media only screen and (max-width: 600px) {\n      .email-wrapper {\n        padding: 15px 8px !important;\n      }\n\n      .email-container {\n        width: 100% !important;\n      }\n\n      .content-padding {\n        padding-left: 22px !important;\n        padding-right: 22px !important;\n      }\n\n      .main-heading {\n        font-size: 26px !important;\n      }\n\n      .detail-label {\n        width: 35% !important;\n      }\n\n      .detail-value {\n        word-break: break-word !important;\n      }\n\n      .appointment-date {\n        font-size: 21px !important;\n      }\n    }\n  </style>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#FDFAF0;\">\n\n  <!-- Hidden email preview -->\n  <div style=\"display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;\">\n    Your property viewing appointment details from Ramona's Home.\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0;\">\n    <tr>\n      <td align=\"center\" class=\"email-wrapper\" style=\"padding:35px 15px;\">\n\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"email-container\" style=\"width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid #E9E2D4;\">\n\n          <!-- Header -->\n          <tr>\n            <td align=\"center\" style=\"padding:38px 25px 32px; background-color:#FDFAF0; border-bottom:1px solid #E9E2D4;\">\n\n              <p style=\"margin:0; color:#57482D; font-size:11px; font-weight:bold; letter-spacing:4px; text-transform:uppercase;\">\n                RAMONA'S HOME\n              </p>\n\n              <table role=\"presentation\" width=\"42\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:19px auto;\">\n                <tr>\n                  <td height=\"2\" style=\"height:2px; background-color:#FADF1E; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <h1 class=\"main-heading\" style=\"margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:30px; line-height:1.35; font-weight:normal; color:#151513;\">\n                Your Viewing Appointment\n              </h1>\n\n              <p style=\"margin:12px 0 0; font-size:14px; line-height:1.7; color:#878276;\">\n                Let's take the next step towards finding your ideal property.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Greeting -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:32px 38px 20px;\">\n\n              <p style=\"margin:0 0 13px; color:#151513; font-size:15px; line-height:1.7;\">\n                Hello {{ String($('Switch').item.json.fullName || 'there').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }},\n              </p>\n\n              <p style=\"margin:0; color:#534F46; font-size:14px; line-height:1.85;\">\n                Thank you for choosing Ramona's Home. We've received your property enquiry and scheduled your viewing appointment. Please review the details below and respond to the calendar invitation to confirm whether the proposed time works for you.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Appointment Card -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:12px 38px 28px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FCF0D8; border-left:4px solid #57482D;\">\n                <tr>\n                  <td style=\"padding:24px 24px 22px;\">\n\n                    <p style=\"margin:0 0 14px; color:#57482D; font-size:10px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;\">\n                      YOUR APPOINTMENT\n                    </p>\n\n                    <p class=\"appointment-date\" style=\"margin:0 0 8px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:25px; line-height:1.4;\">\n                      {{ $('Switch').item.json['viewing date'] }}\n                    </p>\n\n                    <p style=\"margin:0; color:#534F46; font-size:16px; line-height:1.6;\">\n                      {{ $('Switch').item.json['viewing time'] }}\n                    </p>\n\n                    <p style=\"margin:8px 0 0; color:#878276; font-size:12px; line-height:1.6;\">\n                      {{ (() => {\n                        const data = $('Switch').item.json;\n                        const zone = data.timezone || 'America/Toronto';\n                        const appointment = data.viewingDateTime;\n                        if (!appointment) return zone;\n                        return DateTime.fromISO(appointment, { setZone: true })\n                          .setZone(zone)\n                          .toFormat('ZZZZ') + ' (' + zone + ')';\n                      })() }}\n                    </p>\n\n                    <p style=\"margin:13px 0 0; color:#878276; font-size:12px;\">\n                      Property viewing · 2-hour appointment\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Property Enquiry -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 30px;\">\n\n              <h2 style=\"margin:0 0 16px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:21px; font-weight:normal;\">\n                Your Property Enquiry\n              </h2>\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n                <tr>\n                  <td class=\"detail-label\" width=\"35%\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Property Types\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7;\">\n                    {{ String($('Switch').item.json.buildingTypes || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Location\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ String($('Switch').item.json.location || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Budget\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ (() => {\n                      const value = $('Switch').item.json.budget;\n                      if (value === undefined || value === null || String(value).trim() === '') return 'Not specified';\n                      const amount = Number(String(value).replace(/[^0-9.-]/g, ''));\n                      return Number.isFinite(amount)\n                        ? 'CAD $' + amount.toLocaleString('en-CA', { maximumFractionDigits: 2 })\n                        : String(value);\n                    })() }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px; vertical-align:top;\">\n                    Special Request\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7; overflow-wrap:anywhere;\">\n                    {{ String($('Switch').item.json.specialRequest || 'No additional requirements provided.').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\r\\n|\\r|\\n/g, '<br>') }}\n                  </td>\n                </tr>\n\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Confirmation -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 32px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0; border:1px solid #E9E2D4;\">\n                <tr>\n                  <td style=\"padding:22px 22px;\">\n\n                    <h3 style=\"margin:0 0 10px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:19px; font-weight:normal;\">\n                      Please Confirm Your Availability\n                    </h3>\n\n                    <p style=\"margin:0; color:#534F46; font-size:13px; line-height:1.8;\">\n                      Kindly respond to the calendar invitation with <strong>Yes</strong>, <strong>No</strong> or <strong>Maybe</strong> to let us know whether the scheduled appointment works for you.\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Closing -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 35px;\">\n\n              <p style=\"margin:0 0 17px; color:#534F46; font-size:14px; line-height:1.8;\">\n                We look forward to assisting you with your property search.\n              </p>\n\n              <p style=\"margin:0 0 5px; color:#878276; font-size:13px;\">\n                Kind regards,\n              </p>\n\n              <p style=\"margin:0; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:20px;\">\n                Ramona's Home\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td align=\"center\" style=\"padding:29px 22px; background-color:#151513;\">\n\n              <p style=\"margin:0 0 13px; color:#FCF0D8; font-size:10px; font-weight:bold; letter-spacing:3px;\">\n                RAMONA'S HOME\n              </p>\n\n              <p style=\"margin:0 0 17px; color:#D2C9B7; font-size:12px; line-height:1.7;\">\n                Have a question about your appointment?\n              </p>\n\n              <p style=\"margin:0 0 13px; font-size:13px;\">\n                <a href=\"tel:+1457567679\" style=\"color:#FADF1E; text-decoration:none;\">\n                  +1 4575 676 79\n                </a>\n              </p>\n\n              <p style=\"margin:0 0 20px; font-size:13px;\">\n                <a href=\"https://ramonashome.pages.dev/\" target=\"_blank\" style=\"color:#FCF0D8; text-decoration:underline;\">\n                  Visit Our Website\n                </a>\n              </p>\n\n              <table role=\"presentation\" width=\"240\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td height=\"1\" style=\"height:1px; background-color:#534F46; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <p style=\"margin:17px 0 0; color:#878276; font-size:10px; line-height:1.7;\">\n                © Ramona's Home. All rights reserved.\n              </p>\n\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2080,
+        -496
+      ],
+      "id": "c432b131-cafe-4dd7-81f5-90875f0c5cee",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "shileadewole@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shileadewole@gmail.com"
+        },
+        "start": "={{ $('Switch').item.json.viewingDateTime }}",
+        "end": "={{ $('Switch').item.json.endTime }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.email }} , shileadewole@gmail.com"
+          ],
+          "color": "1",
+          "description": "={{\n`Good day ${$json.fullName},\n\nYour property viewing appointment with Ramona's House is scheduled as follows:\n\nProperty Types: ${$('Switch').item.json.buildingTypes}\nLocation: ${$json.location}\nBudget: ${$json.budget ? 'CAD $' + Number($json.budget).toLocaleString('en-CA') : 'Not specified'}\nAdditional Requirements: ${$json.moreRequests || 'None provided'}\n\nPlease review the appointment details and confirm your availability by responding Yes, No or Maybe.\n\nWe look forward to assisting you.\n\nRamona's House`\n}}",
+          "location": "={{ $json.location }}",
+          "sendUpdates": "all",
+          "summary": "={{ `Property Viewing – ${$json.fullName} | ${$('Switch').item.json.buildingTypes} | ${$json.location}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        1584,
+        -496
+      ],
+      "id": "ce8ce906-dfc6-412d-9fa0-fbf508a83f02",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}, shileadewole@gmail.com",
+        "subject": "={{ $json.subjectline }}",
+        "message": "={{ $json.emailbody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Emily from Ramona's Team"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2288,
+        -496
+      ],
+      "id": "8647b3a4-0556-4a1a-a678-a01d23c9c1ce",
+      "name": "Send a message1",
+      "webhookId": "6414844f-87cd-44e7-9c38-7e27befe8493",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EUNrmnQq172EURzU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "shileadewole@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shileadewole@gmail.com"
+        },
+        "start": "={{ $('Switch').item.json.viewingDateTime }}",
+        "end": "={{ $('Switch').item.json.endTime }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.email }} , shileadewole@gmail.com"
+          ],
+          "color": "1",
+          "description": "={{\n`Good day ${$json.fullName},\n\nYour property viewing appointment with Ramona's House is scheduled as follows:\n\nProperty Types: ${$('Switch').item.json.buildingTypes}\nLocation: ${$json.location}\nBudget: ${$json.budget ? 'CAD $' + Number($json.budget).toLocaleString('en-CA') : 'Not specified'}\nAdditional Requirements: ${$json.moreRequests || 'None provided'}\n\nPlease review the appointment details and confirm your availability by responding Yes, No or Maybe.\n\nWe look forward to assisting you.\n\nRamona's House`\n}}",
+          "location": "={{ $json.location }}",
+          "sendUpdates": "all",
+          "summary": "={{ `Property Viewing – ${$json.fullName} | ${$('Switch').item.json.buildingTypes} | ${$json.location}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        1600,
+        -304
+      ],
+      "id": "840ab67d-9a7a-4856-9da5-90cfe3b8492b",
+      "name": "Create an event1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a53ac292-b949-4a86-a643-16dec4fd3a83",
+              "name": "email",
+              "value": "={{ $('Switch').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "fc8fc671-099d-4305-9f9f-70e5906e637d",
+              "name": "subjectline",
+              "value": "=Confirmation of Viewing for {{ $('Switch').item.json.buildingTypes }} - {{ $('Switch').item.json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "76273c4a-52cb-410d-a622-49dc41ca3085",
+              "name": "emailbody",
+              "value": "=\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta name=\"color-scheme\" content=\"light\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>Viewing Appointment | Ramona's Home</title>\n\n  <style>\n    body {\n      margin: 0 !important;\n      padding: 0 !important;\n      background-color: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      -webkit-text-size-adjust: 100%;\n    }\n\n    table {\n      border-spacing: 0;\n      border-collapse: collapse;\n    }\n\n    img {\n      border: 0;\n      display: block;\n    }\n\n    a {\n      color: #57482D;\n    }\n\n    @media only screen and (max-width: 600px) {\n      .email-wrapper {\n        padding: 15px 8px !important;\n      }\n\n      .email-container {\n        width: 100% !important;\n      }\n\n      .content-padding {\n        padding-left: 22px !important;\n        padding-right: 22px !important;\n      }\n\n      .main-heading {\n        font-size: 26px !important;\n      }\n\n      .detail-label {\n        width: 35% !important;\n      }\n\n      .detail-value {\n        word-break: break-word !important;\n      }\n\n      .appointment-date {\n        font-size: 21px !important;\n      }\n    }\n  </style>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#FDFAF0;\">\n\n  <!-- Hidden email preview -->\n  <div style=\"display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;\">\n    Your property viewing appointment details from Ramona's Home.\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0;\">\n    <tr>\n      <td align=\"center\" class=\"email-wrapper\" style=\"padding:35px 15px;\">\n\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"email-container\" style=\"width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid #E9E2D4;\">\n\n          <!-- Header -->\n          <tr>\n            <td align=\"center\" style=\"padding:38px 25px 32px; background-color:#FDFAF0; border-bottom:1px solid #E9E2D4;\">\n\n              <p style=\"margin:0; color:#57482D; font-size:11px; font-weight:bold; letter-spacing:4px; text-transform:uppercase;\">\n                RAMONA'S HOME\n              </p>\n\n              <table role=\"presentation\" width=\"42\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:19px auto;\">\n                <tr>\n                  <td height=\"2\" style=\"height:2px; background-color:#FADF1E; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <h1 class=\"main-heading\" style=\"margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:30px; line-height:1.35; font-weight:normal; color:#151513;\">\n                Your Viewing Appointment\n              </h1>\n\n              <p style=\"margin:12px 0 0; font-size:14px; line-height:1.7; color:#878276;\">\n                Let's take the next step towards finding your ideal property.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Greeting -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:32px 38px 20px;\">\n\n              <p style=\"margin:0 0 13px; color:#151513; font-size:15px; line-height:1.7;\">\n                Hello {{ String($('Switch').item.json.fullName || 'there').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }},\n              </p>\n\n              <p style=\"margin:0; color:#534F46; font-size:14px; line-height:1.85;\">\n                Thank you for choosing Ramona's Home. We've received your property enquiry and scheduled your viewing appointment. Please review the details below and respond to the calendar invitation to confirm whether the proposed time works for you.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Appointment Card -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:12px 38px 28px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FCF0D8; border-left:4px solid #57482D;\">\n                <tr>\n                  <td style=\"padding:24px 24px 22px;\">\n\n                    <p style=\"margin:0 0 14px; color:#57482D; font-size:10px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;\">\n                      YOUR APPOINTMENT\n                    </p>\n\n                    <p class=\"appointment-date\" style=\"margin:0 0 8px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:25px; line-height:1.4;\">\n                      {{ $('Switch').item.json['viewing date'] }}\n                    </p>\n\n                    <p style=\"margin:0; color:#534F46; font-size:16px; line-height:1.6;\">\n                      {{ $('Switch').item.json['viewing time'] }}\n                    </p>\n\n                    <p style=\"margin:8px 0 0; color:#878276; font-size:12px; line-height:1.6;\">\n                      {{ (() => {\n                        const data = $('Switch').item.json;\n                        const zone = data.timezone || 'America/Toronto';\n                        const appointment = data.viewingDateTime;\n                        if (!appointment) return zone;\n                        return DateTime.fromISO(appointment, { setZone: true })\n                          .setZone(zone)\n                          .toFormat('ZZZZ') + ' (' + zone + ')';\n                      })() }}\n                    </p>\n\n                    <p style=\"margin:13px 0 0; color:#878276; font-size:12px;\">\n                      Property viewing · 2-hour appointment\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Property Enquiry -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 30px;\">\n\n              <h2 style=\"margin:0 0 16px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:21px; font-weight:normal;\">\n                Your Property Enquiry\n              </h2>\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n                <tr>\n                  <td class=\"detail-label\" width=\"35%\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Property Types\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7;\">\n                    {{ String($('Switch').item.json.buildingTypes || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Location\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ String($('Switch').item.json.location || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Budget\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ (() => {\n                      const value = $('Switch').item.json.budget;\n                      if (value === undefined || value === null || String(value).trim() === '') return 'Not specified';\n                      const amount = Number(String(value).replace(/[^0-9.-]/g, ''));\n                      return Number.isFinite(amount)\n                        ? 'CAD $' + amount.toLocaleString('en-CA', { maximumFractionDigits: 2 })\n                        : String(value);\n                    })() }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px; vertical-align:top;\">\n                    Special Request\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7; overflow-wrap:anywhere;\">\n                    {{ String($('Switch').item.json.specialRequest || 'No additional requirements provided.').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\r\\n|\\r|\\n/g, '<br>') }}\n                  </td>\n                </tr>\n\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Confirmation -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 32px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0; border:1px solid #E9E2D4;\">\n                <tr>\n                  <td style=\"padding:22px 22px;\">\n\n                    <h3 style=\"margin:0 0 10px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:19px; font-weight:normal;\">\n                      Please Confirm Your Availability\n                    </h3>\n\n                    <p style=\"margin:0; color:#534F46; font-size:13px; line-height:1.8;\">\n                      Kindly respond to the calendar invitation with <strong>Yes</strong>, <strong>No</strong> or <strong>Maybe</strong> to let us know whether the scheduled appointment works for you.\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Closing -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 35px;\">\n\n              <p style=\"margin:0 0 17px; color:#534F46; font-size:14px; line-height:1.8;\">\n                We look forward to assisting you with your property search.\n              </p>\n\n              <p style=\"margin:0 0 5px; color:#878276; font-size:13px;\">\n                Kind regards,\n              </p>\n\n              <p style=\"margin:0; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:20px;\">\n                Ramona's Home\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td align=\"center\" style=\"padding:29px 22px; background-color:#151513;\">\n\n              <p style=\"margin:0 0 13px; color:#FCF0D8; font-size:10px; font-weight:bold; letter-spacing:3px;\">\n                RAMONA'S HOME\n              </p>\n\n              <p style=\"margin:0 0 17px; color:#D2C9B7; font-size:12px; line-height:1.7;\">\n                Have a question about your appointment?\n              </p>\n\n              <p style=\"margin:0 0 13px; font-size:13px;\">\n                <a href=\"tel:+1457567679\" style=\"color:#FADF1E; text-decoration:none;\">\n                  +1 4575 676 79\n                </a>\n              </p>\n\n              <p style=\"margin:0 0 20px; font-size:13px;\">\n                <a href=\"https://ramonashome.pages.dev/\" target=\"_blank\" style=\"color:#FCF0D8; text-decoration:underline;\">\n                  Visit Our Website\n                </a>\n              </p>\n\n              <table role=\"presentation\" width=\"240\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td height=\"1\" style=\"height:1px; background-color:#534F46; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <p style=\"margin:17px 0 0; color:#878276; font-size:10px; line-height:1.7;\">\n                © Ramona's Home. All rights reserved.\n              </p>\n\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2096,
+        -304
+      ],
+      "id": "358f0925-61ad-49ec-9bf8-388a3c47dffa",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}, shileadewole@gmail.com",
+        "subject": "={{ $json.subjectline }}",
+        "message": "={{ $json.emailbody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Emily from Ramona's Team"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2320,
+        -304
+      ],
+      "id": "88b659f2-9e36-4488-9d0d-47c402f013bb",
+      "name": "Send a message",
+      "webhookId": "6414844f-87cd-44e7-9c38-7e27befe8493",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EUNrmnQq172EURzU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "shileadewole@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shileadewole@gmail.com"
+        },
+        "start": "={{ $('Switch').item.json.viewingDateTime }}",
+        "end": "={{ $('Switch').item.json.endTime }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.email }} , shileadewole@gmail.com"
+          ],
+          "color": "1",
+          "description": "={{\n`Good day ${$json.fullName},\n\nYour property viewing appointment with Ramona's House is scheduled as follows:\n\nProperty Types: ${$('Switch').item.json.buildingTypes}\nLocation: ${$json.location}\nBudget: ${$json.budget ? 'CAD $' + Number($json.budget).toLocaleString('en-CA') : 'Not specified'}\nAdditional Requirements: ${$json.moreRequests || 'None provided'}\n\nPlease review the appointment details and confirm your availability by responding Yes, No or Maybe.\n\nWe look forward to assisting you.\n\nRamona's House`\n}}",
+          "location": "={{ $json.location }}",
+          "sendUpdates": "all",
+          "summary": "={{ `Property Viewing – ${$json.fullName} | ${$('Switch').item.json.buildingTypes} | ${$json.location}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.4,
+      "position": [
+        1600,
+        -112
+      ],
+      "id": "de96aa48-7fba-4d7f-8edc-9ede25fbdafc",
+      "name": "Create an event2",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "NsZkgGgYXnRh4AkO",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a53ac292-b949-4a86-a643-16dec4fd3a83",
+              "name": "email",
+              "value": "={{ $('Switch').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "fc8fc671-099d-4305-9f9f-70e5906e637d",
+              "name": "subjectline",
+              "value": "=Confirmation of Viewing for {{ $('Switch').item.json.buildingTypes }} - {{ $('Switch').item.json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "76273c4a-52cb-410d-a622-49dc41ca3085",
+              "name": "emailbody",
+              "value": "=\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta name=\"color-scheme\" content=\"light\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>Viewing Appointment | Ramona's Home</title>\n\n  <style>\n    body {\n      margin: 0 !important;\n      padding: 0 !important;\n      background-color: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      -webkit-text-size-adjust: 100%;\n    }\n\n    table {\n      border-spacing: 0;\n      border-collapse: collapse;\n    }\n\n    img {\n      border: 0;\n      display: block;\n    }\n\n    a {\n      color: #57482D;\n    }\n\n    @media only screen and (max-width: 600px) {\n      .email-wrapper {\n        padding: 15px 8px !important;\n      }\n\n      .email-container {\n        width: 100% !important;\n      }\n\n      .content-padding {\n        padding-left: 22px !important;\n        padding-right: 22px !important;\n      }\n\n      .main-heading {\n        font-size: 26px !important;\n      }\n\n      .detail-label {\n        width: 35% !important;\n      }\n\n      .detail-value {\n        word-break: break-word !important;\n      }\n\n      .appointment-date {\n        font-size: 21px !important;\n      }\n    }\n  </style>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#FDFAF0;\">\n\n  <!-- Hidden email preview -->\n  <div style=\"display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;\">\n    Your property viewing appointment details from Ramona's Home.\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0;\">\n    <tr>\n      <td align=\"center\" class=\"email-wrapper\" style=\"padding:35px 15px;\">\n\n        <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"email-container\" style=\"width:100%; max-width:600px; background-color:#FFFFFF; border:1px solid #E9E2D4;\">\n\n          <!-- Header -->\n          <tr>\n            <td align=\"center\" style=\"padding:38px 25px 32px; background-color:#FDFAF0; border-bottom:1px solid #E9E2D4;\">\n\n              <p style=\"margin:0; color:#57482D; font-size:11px; font-weight:bold; letter-spacing:4px; text-transform:uppercase;\">\n                RAMONA'S HOME\n              </p>\n\n              <table role=\"presentation\" width=\"42\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin:19px auto;\">\n                <tr>\n                  <td height=\"2\" style=\"height:2px; background-color:#FADF1E; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <h1 class=\"main-heading\" style=\"margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:30px; line-height:1.35; font-weight:normal; color:#151513;\">\n                Your Viewing Appointment\n              </h1>\n\n              <p style=\"margin:12px 0 0; font-size:14px; line-height:1.7; color:#878276;\">\n                Let's take the next step towards finding your ideal property.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Greeting -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:32px 38px 20px;\">\n\n              <p style=\"margin:0 0 13px; color:#151513; font-size:15px; line-height:1.7;\">\n                Hello {{ String($('Switch').item.json.fullName || 'there').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }},\n              </p>\n\n              <p style=\"margin:0; color:#534F46; font-size:14px; line-height:1.85;\">\n                Thank you for choosing Ramona's Home. We've received your property enquiry and scheduled your viewing appointment. Please review the details below and respond to the calendar invitation to confirm whether the proposed time works for you.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Appointment Card -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:12px 38px 28px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FCF0D8; border-left:4px solid #57482D;\">\n                <tr>\n                  <td style=\"padding:24px 24px 22px;\">\n\n                    <p style=\"margin:0 0 14px; color:#57482D; font-size:10px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;\">\n                      YOUR APPOINTMENT\n                    </p>\n\n                    <p class=\"appointment-date\" style=\"margin:0 0 8px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:25px; line-height:1.4;\">\n                      {{ $('Switch').item.json['viewing date'] }}\n                    </p>\n\n                    <p style=\"margin:0; color:#534F46; font-size:16px; line-height:1.6;\">\n                      {{ $('Switch').item.json['viewing time'] }}\n                    </p>\n\n                    <p style=\"margin:8px 0 0; color:#878276; font-size:12px; line-height:1.6;\">\n                      {{ (() => {\n                        const data = $('Switch').item.json;\n                        const zone = data.timezone || 'America/Toronto';\n                        const appointment = data.viewingDateTime;\n                        if (!appointment) return zone;\n                        return DateTime.fromISO(appointment, { setZone: true })\n                          .setZone(zone)\n                          .toFormat('ZZZZ') + ' (' + zone + ')';\n                      })() }}\n                    </p>\n\n                    <p style=\"margin:13px 0 0; color:#878276; font-size:12px;\">\n                      Property viewing · 2-hour appointment\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Property Enquiry -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 30px;\">\n\n              <h2 style=\"margin:0 0 16px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:21px; font-weight:normal;\">\n                Your Property Enquiry\n              </h2>\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n                <tr>\n                  <td class=\"detail-label\" width=\"35%\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Property Types\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7;\">\n                    {{ String($('Switch').item.json.buildingTypes || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Location\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ String($('Switch').item.json.location || 'Not specified').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;') }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px;\">\n                    Budget\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px;\">\n                    {{ (() => {\n                      const value = $('Switch').item.json.budget;\n                      if (value === undefined || value === null || String(value).trim() === '') return 'Not specified';\n                      const amount = Number(String(value).replace(/[^0-9.-]/g, ''));\n                      return Number.isFinite(amount)\n                        ? 'CAD $' + amount.toLocaleString('en-CA', { maximumFractionDigits: 2 })\n                        : String(value);\n                    })() }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td class=\"detail-label\" style=\"padding:12px 8px 12px 0; border-bottom:1px solid #E9E2D4; color:#878276; font-size:13px; vertical-align:top;\">\n                    Special Request\n                  </td>\n\n                  <td class=\"detail-value\" style=\"padding:12px 0; border-bottom:1px solid #E9E2D4; color:#151513; font-size:13px; line-height:1.7; overflow-wrap:anywhere;\">\n                    {{ String($('Switch').item.json.specialRequest || 'No additional requirements provided.').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;').replace(/\\r\\n|\\r|\\n/g, '<br>') }}\n                  </td>\n                </tr>\n\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Confirmation -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 32px;\">\n\n              <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#FDFAF0; border:1px solid #E9E2D4;\">\n                <tr>\n                  <td style=\"padding:22px 22px;\">\n\n                    <h3 style=\"margin:0 0 10px; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:19px; font-weight:normal;\">\n                      Please Confirm Your Availability\n                    </h3>\n\n                    <p style=\"margin:0; color:#534F46; font-size:13px; line-height:1.8;\">\n                      Kindly respond to the calendar invitation with <strong>Yes</strong>, <strong>No</strong> or <strong>Maybe</strong> to let us know whether the scheduled appointment works for you.\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Closing -->\n          <tr>\n            <td class=\"content-padding\" style=\"padding:0 38px 35px;\">\n\n              <p style=\"margin:0 0 17px; color:#534F46; font-size:14px; line-height:1.8;\">\n                We look forward to assisting you with your property search.\n              </p>\n\n              <p style=\"margin:0 0 5px; color:#878276; font-size:13px;\">\n                Kind regards,\n              </p>\n\n              <p style=\"margin:0; color:#151513; font-family:Georgia, 'Times New Roman', serif; font-size:20px;\">\n                Ramona's Home\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td align=\"center\" style=\"padding:29px 22px; background-color:#151513;\">\n\n              <p style=\"margin:0 0 13px; color:#FCF0D8; font-size:10px; font-weight:bold; letter-spacing:3px;\">\n                RAMONA'S HOME\n              </p>\n\n              <p style=\"margin:0 0 17px; color:#D2C9B7; font-size:12px; line-height:1.7;\">\n                Have a question about your appointment?\n              </p>\n\n              <p style=\"margin:0 0 13px; font-size:13px;\">\n                <a href=\"tel:+1457567679\" style=\"color:#FADF1E; text-decoration:none;\">\n                  +1 4575 676 79\n                </a>\n              </p>\n\n              <p style=\"margin:0 0 20px; font-size:13px;\">\n                <a href=\"https://ramonashome.pages.dev/\" target=\"_blank\" style=\"color:#FCF0D8; text-decoration:underline;\">\n                  Visit Our Website\n                </a>\n              </p>\n\n              <table role=\"presentation\" width=\"240\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td height=\"1\" style=\"height:1px; background-color:#534F46; font-size:0; line-height:0;\">&nbsp;</td>\n                </tr>\n              </table>\n\n              <p style=\"margin:17px 0 0; color:#878276; font-size:10px; line-height:1.7;\">\n                © Ramona's Home. All rights reserved.\n              </p>\n\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2112,
+        -112
+      ],
+      "id": "a42f13cb-9c4c-43c0-8c80-6ea8fe6fff92",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}, shileadewole@gmail.com",
+        "subject": "={{ $json.subjectline }}",
+        "message": "={{ $json.emailbody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Emily from Ramona's Team"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2336,
+        -112
+      ],
+      "id": "d6a2d9a1-1cc5-45ed-94d7-ad7d540222e2",
+      "name": "Send a message2",
+      "webhookId": "6414844f-87cd-44e7-9c38-7e27befe8493",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EUNrmnQq172EURzU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"respondWith\": \"text\",\n        \"responseBody\": \"=\\n<div class=\\\"viewing-success\\\">\\n  <style>\\n    .viewing-success {\\n      box-sizing: border-box;\\n      width: 100%;\\n      min-height: 360px;\\n      padding: 48px 24px;\\n      display: flex;\\n      align-items: center;\\n      justify-content: center;\\n      background: #FDFAF0;\\n      font-family: Arial, Helvetica, sans-serif;\\n      color: #151513;\\n    }\\n\\n    .viewing-success * {\\n      box-sizing: border-box;\\n    }\\n\\n    .success-card {\\n      width: 100%;\\n      max-width: 520px;\\n      padding: 42px 36px;\\n      background: #FFFFFF;\\n      border: 1px solid #E9E2D4;\\n      border-radius: 12px;\\n      text-align: center;\\n      box-shadow: 0 8px 28px rgba(21, 21, 19, 0.05);\\n    }\\n\\n    .success-icon {\\n      width: 58px;\\n      height: 58px;\\n      margin: 0 auto 24px;\\n      display: flex;\\n      align-items: center;\\n      justify-content: center;\\n      background: #FCF0D8;\\n      border-radius: 50%;\\n    }\\n\\n    .success-card h2 {\\n      margin: 0;\\n      font-size: 27px;\\n      line-height: 1.3;\\n      font-weight: 600;\\n      letter-spacing: -0.5px;\\n      color: #151513;\\n    }\\n\\n    .success-divider {\\n      width: 46px;\\n      height: 3px;\\n      margin: 22px auto;\\n      background: #FADF1E;\\n      border-radius: 4px;\\n    }\\n\\n    .success-message {\\n      max-width: 410px;\\n      margin: 0 auto;\\n      color: #534F46;\\n      font-size: 15px;\\n      line-height: 1.8;\\n    }\\n\\n    .success-footer {\\n      margin-top: 30px;\\n      padding-top: 22px;\\n      border-top: 1px solid #E9E2D4;\\n      color: #878276;\\n      font-size: 13px;\\n      line-height: 1.6;\\n    }\\n\\n    @media (max-width: 480px) {\\n      .viewing-success {\\n        padding: 28px 16px;\\n      }\\n\\n      .success-card {\\n        padding: 34px 22px;\\n      }\\n\\n      .success-card h2 {\\n        font-size: 23px;\\n      }\\n\\n      .success-message {\\n        font-size: 14px;\\n      }\\n    }\\n  </style>\\n\\n  <div class=\\\"success-card\\\">\\n    <div class=\\\"success-icon\\\">\\n      <svg\\n        width=\\\"28\\\"\\n        height=\\\"28\\\"\\n        viewBox=\\\"0 0 24 24\\\"\\n        fill=\\\"none\\\"\\n        stroke=\\\"#57482D\\\"\\n        stroke-width=\\\"2\\\"\\n        stroke-linecap=\\\"round\\\"\\n        stroke-linejoin=\\\"round\\\"\\n        aria-hidden=\\\"true\\\"\\n      >\\n        <path d=\\\"M20 6L9 17l-5-5\\\"></path>\\n      </svg>\\n    </div>\\n\\n    <h2>Viewing Request Confirmed</h2>\\n\\n    <div class=\\\"success-divider\\\"></div>\\n\\n    <p class=\\\"success-message\\\">\\n      Your property viewing has been successfully scheduled.\\n      Check your inbox for your calendar and email confirmation.\\n      We look forward to helping you find your next home.\\n    </p>\\n\\n    <div class=\\\"success-footer\\\">\\n      Thank you for choosing Ramona's Home.\\n    </div>\\n  </div>\\n</div>\\n\",\n        \"options\": {\n          \"responseHeaders\": {\n            \"entries\": [\n              {\n                \"name\": \"Access-Control-Allow-Origin\",\n                \"value\": \"https://ramonashome.pages.dev\"\n              }\n            ]\n          }\n        }\n      },\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1.5,\n      \"position\": [\n        2080,\n        144\n      ],\n      \"id\": \"0d5d3368-2dfa-474b-b8d3-20e783a60dcf\",\n      \"name\": \"Respond to Webhook3\"\n    }\n  ],\n  \"connections\": {},\n  \"pinData\": {},\n  \"meta\": {\n    \"templateCredsSetupCompleted\": true,\n    \"instanceId\": \"a6d458fa1fc19eee36f7a684e17ae70f400ab525199e53377eda66828191c2f5\"\n  }\n}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "https://ramonashome.pages.dev"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1824,
+        -496
+      ],
+      "id": "d112da94-4907-4295-a9f7-c73d0cd8c457",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=\n<div class=\"viewing-success\">\n  <style>\n    .viewing-success {\n      box-sizing: border-box;\n      width: 100%;\n      min-height: 360px;\n      padding: 48px 24px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      color: #151513;\n    }\n\n    .viewing-success * {\n      box-sizing: border-box;\n    }\n\n    .success-card {\n      width: 100%;\n      max-width: 520px;\n      padding: 42px 36px;\n      background: #FFFFFF;\n      border: 1px solid #E9E2D4;\n      border-radius: 12px;\n      text-align: center;\n      box-shadow: 0 8px 28px rgba(21, 21, 19, 0.05);\n    }\n\n    .success-icon {\n      width: 58px;\n      height: 58px;\n      margin: 0 auto 24px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: #FCF0D8;\n      border-radius: 50%;\n    }\n\n    .success-card h2 {\n      margin: 0;\n      font-size: 27px;\n      line-height: 1.3;\n      font-weight: 600;\n      letter-spacing: -0.5px;\n      color: #151513;\n    }\n\n    .success-divider {\n      width: 46px;\n      height: 3px;\n      margin: 22px auto;\n      background: #FADF1E;\n      border-radius: 4px;\n    }\n\n    .success-message {\n      max-width: 410px;\n      margin: 0 auto;\n      color: #534F46;\n      font-size: 15px;\n      line-height: 1.8;\n    }\n\n    .success-footer {\n      margin-top: 30px;\n      padding-top: 22px;\n      border-top: 1px solid #E9E2D4;\n      color: #878276;\n      font-size: 13px;\n      line-height: 1.6;\n    }\n\n    @media (max-width: 480px) {\n      .viewing-success {\n        padding: 28px 16px;\n      }\n\n      .success-card {\n        padding: 34px 22px;\n      }\n\n      .success-card h2 {\n        font-size: 23px;\n      }\n\n      .success-message {\n        font-size: 14px;\n      }\n    }\n  </style>\n\n  <div class=\"success-card\">\n    <div class=\"success-icon\">\n      <svg\n        width=\"28\"\n        height=\"28\"\n        viewBox=\"0 0 24 24\"\n        fill=\"none\"\n        stroke=\"#57482D\"\n        stroke-width=\"2\"\n        stroke-linecap=\"round\"\n        stroke-linejoin=\"round\"\n        aria-hidden=\"true\"\n      >\n        <path d=\"M20 6L9 17l-5-5\"></path>\n      </svg>\n    </div>\n\n    <h2>Viewing Request Confirmed</h2>\n\n    <div class=\"success-divider\"></div>\n\n    <p class=\"success-message\">\n      Your property viewing has been successfully scheduled.\n      Check your inbox for your calendar and email confirmation.\n      We look forward to helping you find your next home.\n    </p>\n\n    <div class=\"success-footer\">\n      Thank you for choosing Ramona's Home.\n    </div>\n  </div>\n</div>\n",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "https://ramonashome.pages.dev"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1840,
+        -304
+      ],
+      "id": "767a780f-2606-445b-af3c-c7ce9ff21f79",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=\n<div class=\"viewing-success\">\n  <style>\n    .viewing-success {\n      box-sizing: border-box;\n      width: 100%;\n      min-height: 360px;\n      padding: 48px 24px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: #FDFAF0;\n      font-family: Arial, Helvetica, sans-serif;\n      color: #151513;\n    }\n\n    .viewing-success * {\n      box-sizing: border-box;\n    }\n\n    .success-card {\n      width: 100%;\n      max-width: 520px;\n      padding: 42px 36px;\n      background: #FFFFFF;\n      border: 1px solid #E9E2D4;\n      border-radius: 12px;\n      text-align: center;\n      box-shadow: 0 8px 28px rgba(21, 21, 19, 0.05);\n    }\n\n    .success-icon {\n      width: 58px;\n      height: 58px;\n      margin: 0 auto 24px;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      background: #FCF0D8;\n      border-radius: 50%;\n    }\n\n    .success-card h2 {\n      margin: 0;\n      font-size: 27px;\n      line-height: 1.3;\n      font-weight: 600;\n      letter-spacing: -0.5px;\n      color: #151513;\n    }\n\n    .success-divider {\n      width: 46px;\n      height: 3px;\n      margin: 22px auto;\n      background: #FADF1E;\n      border-radius: 4px;\n    }\n\n    .success-message {\n      max-width: 410px;\n      margin: 0 auto;\n      color: #534F46;\n      font-size: 15px;\n      line-height: 1.8;\n    }\n\n    .success-footer {\n      margin-top: 30px;\n      padding-top: 22px;\n      border-top: 1px solid #E9E2D4;\n      color: #878276;\n      font-size: 13px;\n      line-height: 1.6;\n    }\n\n    @media (max-width: 480px) {\n      .viewing-success {\n        padding: 28px 16px;\n      }\n\n      .success-card {\n        padding: 34px 22px;\n      }\n\n      .success-card h2 {\n        font-size: 23px;\n      }\n\n      .success-message {\n        font-size: 14px;\n      }\n    }\n  </style>\n\n  <div class=\"success-card\">\n    <div class=\"success-icon\">\n      <svg\n        width=\"28\"\n        height=\"28\"\n        viewBox=\"0 0 24 24\"\n        fill=\"none\"\n        stroke=\"#57482D\"\n        stroke-width=\"2\"\n        stroke-linecap=\"round\"\n        stroke-linejoin=\"round\"\n        aria-hidden=\"true\"\n      >\n        <path d=\"M20 6L9 17l-5-5\"></path>\n      </svg>\n    </div>\n\n    <h2>Viewing Request Confirmed</h2>\n\n    <div class=\"success-divider\"></div>\n\n    <p class=\"success-message\">\n      Your property viewing has been successfully scheduled.\n      Check your inbox for your calendar and email confirmation.\n      We look forward to helping you find your next home.\n    </p>\n\n    <div class=\"success-footer\">\n      Thank you for choosing Ramona's Home.\n    </div>\n  </div>\n</div>\n",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "https://ramonashome.pages.dev"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1856,
+        -112
+      ],
+      "id": "c926f9fc-6aa1-47c6-9a6d-0cda55172103",
+      "name": "Respond to Webhook3"
+    }
+  ],
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Create an event1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Create an event2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        []
+      ]
+    },
+    "Create an event1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Create an event2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook1": [
+      {
+        "headers": {
+          "host": "n8n.trusevo.com",
+          "content-length": "507",
+          "accept": "application/json, text/html, text/plain",
+          "accept-encoding": "gzip, br",
+          "cdn-loop": "cloudflare; loops=1; subreqs=1",
+          "cf-connecting-ip": "2a06:98c0:3600::103",
+          "cf-ew-via": "15",
+          "cf-ipcountry": "NG",
+          "cf-ray": "a60f40bb2c194f0c-LOS",
+          "cf-visitor": "{\"scheme\":\"https\"}",
+          "cf-warp-tag-id": "be74c708-573e-4678-bf2f-ef577e6cf121",
+          "cf-worker": "ramonashome.pages.dev",
+          "connection": "keep-alive",
+          "content-type": "application/json",
+          "x-forwarded-for": "2a06:98c0:3600::103",
+          "x-forwarded-proto": "https"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "firstName": "Abiola",
+          "lastName": "Adewole",
+          "fullName": "Abiola Adewole",
+          "email": "dewoleblessing@gmail.com",
+          "phone": "+1 (070) 318-7526",
+          "buildingTypes": [
+            "Plexes",
+            "Movable Houses"
+          ],
+          "viewingDateTime": "2026-11-30T12:00:00-06:00",
+          "viewingDate": "2026-11-30",
+          "viewingTime": "12:00",
+          "viewingDateFormatted": "Monday, November 30, 2026",
+          "viewingTimeFormatted": "12:00 PM",
+          "budget": 70000000,
+          "location": "Calgary",
+          "moreRequests": "",
+          "propertyId": null,
+          "propertyName": null,
+          "propertyCategory": null,
+          "timezone": "America/Edmonton"
+        },
+        "webhookUrl": "http://localhost:5678/webhook/5dcfda12-4cf2-419b-8dc5-c00fa9dc350a",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a6d458fa1fc19eee36f7a684e17ae70f400ab525199e53377eda66828191c2f5"
+  }
+}

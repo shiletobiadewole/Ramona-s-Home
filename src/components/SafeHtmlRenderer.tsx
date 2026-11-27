@@ -118,6 +118,12 @@ const CLASS_STYLE_MAP: Record<string, string> = {
   available: 'bg-[#EDF3E8] text-[#47653B] rounded-full px-2.5 py-1 text-[10px] font-bold shrink-0',
   footer: 'bg-[#FDFAF0] border-t border-[#E8E1D4] px-6 py-4 text-center text-xs text-[#878276]',
   'footer-brand': 'text-sm font-medium text-[#151513] mb-1',
+  'viewing-success': 'w-full py-6 px-4 flex items-center justify-center bg-[#FDFAF0] text-[#151513] rounded-sm',
+  'success-card': 'w-full max-w-[520px] p-6 sm:p-9 bg-white border border-[#E9E2D4] rounded-md text-center space-y-4',
+  'success-icon': 'hidden',
+  'success-divider': 'w-12 h-[3px] mx-auto bg-[#FADF1E] rounded-full',
+  'success-message': 'max-w-[420px] mx-auto text-sm sm:text-base text-[#534F46] leading-relaxed',
+  'success-footer': 'pt-5 mt-5 border-t border-[#E9E2D4] text-xs text-[#878276]',
 };
 
 function kebabToCamelCase(prop: string): string {

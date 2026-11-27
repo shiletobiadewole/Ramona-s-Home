@@ -17,6 +17,8 @@ export function RequestViewing() {
   const routerLocation = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [clearedManually, setClearedManually] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [hasUnavailableNotice, setHasUnavailableNotice] = useState(false);
 
   const initialPropertyContext: PropertyContext = useMemo(() => {
     if (clearedManually) {
@@ -62,26 +64,32 @@ export function RequestViewing() {
       <Header />
 
       <main className="flex-1 pt-24 sm:pt-32 pb-20 sm:pb-28">
-        <div className="max-w-4xl mx-auto px-5 sm:px-8">
-          <header className="mb-8 sm:mb-12">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#57482D] mb-3">
-              Request a Viewing
-            </p>
-            <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.025em] leading-[1.1] text-[#151513]">
-              Let&apos;s Find a Time to See You Home.
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-[#534F46] max-w-2xl">
-              Tell us a little about what you&apos;re looking for, and we&apos;ll help
-              arrange a viewing.
-            </p>
-          </header>
+        <div
+          className={`${
+            hasUnavailableNotice && !isConfirmed ? 'max-w-7xl' : 'max-w-4xl'
+          } mx-auto px-5 sm:px-8 transition-[max-width] duration-300`}
+        >
+          {!isConfirmed && (
+            <header className="mb-8 sm:mb-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#57482D] mb-3">
+                Request a Viewing
+              </p>
+              <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.025em] leading-[1.1] text-[#151513]">
+                Let&apos;s Find a Time to See You Home.
+              </h1>
+              <p className="mt-4 text-base sm:text-lg leading-relaxed text-[#534F46] max-w-2xl">
+                Tell us a little about what you&apos;re looking for, and we&apos;ll help
+                arrange a viewing.
+              </p>
+            </header>
+          )}
 
-          <div className="bg-white border border-[#B6AF9D]/75 p-5 sm:p-10 lg:p-12">
-            <ViewingForm
-              initialPropertyContext={initialPropertyContext}
-              onClearPropertyContext={handleClearPropertyContext}
-            />
-          </div>
+          <ViewingForm
+            initialPropertyContext={initialPropertyContext}
+            onClearPropertyContext={handleClearPropertyContext}
+            onConfirmationChange={setIsConfirmed}
+            onUnavailableChange={setHasUnavailableNotice}
+          />
         </div>
       </main>
 

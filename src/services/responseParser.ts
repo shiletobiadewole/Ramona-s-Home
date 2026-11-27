@@ -220,6 +220,20 @@ function extractSlotsFromHtml(html: string): AvailableSlot[] {
   }
 }
 
+function extractHeadingFromHtml(html: string): string | null {
+  const headingMatch = html.match(/<h[12]\b[^>]*>([\s\S]*?)<\/h[12]>/i);
+  if (headingMatch?.[1]) {
+    const text = extractPlainTextFromHtml(headingMatch[1]);
+    if (text) return text;
+  }
+  const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+  if (titleMatch?.[1]) {
+    const text = extractPlainTextFromHtml(titleMatch[1]);
+    if (text) return text;
+  }
+  return null;
+}
+
 /**
  * Treats n8n Respond to Webhook output strictly as untrusted input and validates
  * exact contract fields without inventing fallback messages, slots, or references.
@@ -271,9 +285,13 @@ export function parseWebhookResponse(
           };
         }
 
+        const headingSummary = extractHeadingFromHtml(trimmedText);
         return {
           status: 'success',
-          message: plainSummary || 'Your viewing request has been received.',
+          message:
+            headingSummary ||
+            plainSummary ||
+            'Your viewing request has been received.',
           html: trimmedText,
         };
       }

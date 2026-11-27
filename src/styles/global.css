@@ -57,8 +57,25 @@
   }
 }
 
+@keyframes viewing-slide-from-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(36px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 .animate-viewing-alert {
   animation: viewing-alert-flash 1.4s ease-in-out 3;
+}
+
+.animate-viewing-slide-right {
+  animation:
+    viewing-slide-from-right 0.38s cubic-bezier(0.16, 1, 0.3, 1) both,
+    viewing-alert-flash 1.4s ease-in-out 0.15s 3;
 }
 
 @media (prefers-reduced-motion: reduce) {

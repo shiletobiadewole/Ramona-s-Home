@@ -34,6 +34,8 @@ import { PhoneInputField } from './PhoneInputField';
 interface ViewingFormProps {
   initialPropertyContext: PropertyContext;
   onClearPropertyContext: () => void;
+  onConfirmationChange?: (isConfirmed: boolean) => void;
+  onUnavailableChange?: (hasNotice: boolean) => void;
 }
 
 function createInitialValues(context: PropertyContext): ViewingFormValues {
@@ -54,6 +56,8 @@ function createInitialValues(context: PropertyContext): ViewingFormValues {
 export function ViewingForm({
   initialPropertyContext,
   onClearPropertyContext,
+  onConfirmationChange,
+  onUnavailableChange,
 }: ViewingFormProps) {
   const [values, setValues] = useState<ViewingFormValues>(() =>
     createInitialValues(initialPropertyContext)
@@ -72,7 +76,7 @@ export function ViewingForm({
   );
   const [errorResponse, setErrorResponse] = useState<ErrorResponse | null>(null);
 
-  const statusContainerRef = useRef<HTMLDivElement | null>(null);
+  const statusContainerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (initialPropertyContext.propertyCategory) {
@@ -84,6 +88,14 @@ export function ViewingForm({
       );
     }
   }, [initialPropertyContext.propertyCategory]);
+
+  useEffect(() => {
+    onConfirmationChange?.(Boolean(successResponse));
+  }, [successResponse, onConfirmationChange]);
+
+  useEffect(() => {
+    onUnavailableChange?.(Boolean(unavailableResponse) && !successResponse);
+  }, [unavailableResponse, successResponse, onUnavailableChange]);
 
   const applicableTimezone = useMemo(
     () => getCityTimezone(values.location),
@@ -274,7 +286,12 @@ export function ViewingForm({
 
   if (successResponse) {
     return (
-      <div ref={statusContainerRef}>
+      <div
+        ref={(el) => {
+          statusContainerRef.current = el;
+        }}
+        className="bg-white border border-[#B6AF9D]/75 p-5 sm:p-10 lg:p-12"
+      >
         <SubmissionStatus
           success={successResponse}
           onResetSuccess={handleResetSuccess}
@@ -284,58 +301,63 @@ export function ViewingForm({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Property Context Banner when navigated from a Property Details page */}
-      {initialPropertyContext.propertyName && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-[#B6AF9D] bg-[#FDFAF0]">
-          <div className="flex items-start gap-3">
-            <Building2
-              className="w-5 h-5 text-[#57482D] shrink-0 mt-0.5"
-              aria-hidden="true"
-            />
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#57482D]">
-                Selected Property Reference
-              </p>
-              <p className="text-base font-medium text-[#151513] mt-0.5">
-                {initialPropertyContext.propertyName}
-                {initialPropertyContext.propertyCategory
-                  ? ` · ${initialPropertyContext.propertyCategory}`
-                  : ''}
-              </p>
+    <div
+      className={
+        unavailableResponse
+          ? 'grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start'
+          : ''
+      }
+    >
+      <div
+        className={
+          unavailableResponse
+            ? 'lg:col-span-7 min-w-0 bg-white border border-[#B6AF9D]/75 p-5 sm:p-8 lg:p-10 space-y-8'
+            : 'bg-white border border-[#B6AF9D]/75 p-5 sm:p-10 lg:p-12 space-y-8'
+        }
+      >
+        {/* Property Context Banner when navigated from a Property Details page */}
+        {initialPropertyContext.propertyName && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-[#B6AF9D] bg-[#FDFAF0]">
+            <div className="flex items-start gap-3">
+              <Building2
+                className="w-5 h-5 text-[#57482D] shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#57482D]">
+                  Selected Property Reference
+                </p>
+                <p className="text-base font-medium text-[#151513] mt-0.5">
+                  {initialPropertyContext.propertyName}
+                  {initialPropertyContext.propertyCategory
+                    ? ` · ${initialPropertyContext.propertyCategory}`
+                    : ''}
+                </p>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={onClearPropertyContext}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#534F46] hover:text-[#151513] self-start sm:self-center shrink-0"
+            >
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
+              Clear property
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={onClearPropertyContext}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#534F46] hover:text-[#151513] self-start sm:self-center shrink-0"
-          >
-            <X className="w-3.5 h-3.5" aria-hidden="true" />
-            Clear property
-          </button>
-        </div>
-      )}
-
-      {/* Dynamic Response Banner (Unavailable Slots or Error) */}
-      <div ref={statusContainerRef} className="space-y-6">
-        {errorResponse && <SubmissionStatus error={errorResponse} />}
-
-        {unavailableResponse && (
-          <AvailabilitySlots
-            key={notificationRevision}
-            response={unavailableResponse}
-            selectedSlotDateTime={selectedSlotDateTime}
-            onSelectSlot={handleSelectAlternativeSlot}
-            onConfirmSelectedSlot={handleConfirmAlternative}
-            onDismiss={() => {
-              setUnavailableResponse(null);
-              setSelectedSlotDateTime(null);
-            }}
-            isSubmitting={isSubmitting}
-          />
         )}
-      </div>
+
+        {errorResponse && (
+          <div
+            ref={(el) => {
+              if (!unavailableResponse) {
+                statusContainerRef.current = el;
+              }
+            }}
+          >
+            <SubmissionStatus error={errorResponse} />
+          </div>
+        )}
 
       <form onSubmit={handleSubmit} noValidate className="space-y-8">
         {/* Personal Contact Details — aligned 2-column grid */}
@@ -675,6 +697,30 @@ export function ViewingForm({
           </button>
         </div>
       </form>
+      </div>
+
+      {unavailableResponse && (
+        <aside
+          ref={(el) => {
+            statusContainerRef.current = el;
+          }}
+          aria-label="Alternative viewing times"
+          className="order-first lg:order-last lg:col-span-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7.5rem)] lg:overflow-y-auto min-w-0"
+        >
+          <AvailabilitySlots
+            key={notificationRevision}
+            response={unavailableResponse}
+            selectedSlotDateTime={selectedSlotDateTime}
+            onSelectSlot={handleSelectAlternativeSlot}
+            onConfirmSelectedSlot={handleConfirmAlternative}
+            onDismiss={() => {
+              setUnavailableResponse(null);
+              setSelectedSlotDateTime(null);
+            }}
+            isSubmitting={isSubmitting}
+          />
+        </aside>
+      )}
     </div>
   );
 }

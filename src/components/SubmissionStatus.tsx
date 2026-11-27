@@ -15,6 +15,10 @@ export function SubmissionStatus({
   onResetSuccess,
 }: SubmissionStatusProps) {
   if (success) {
+    const htmlHasHeading = Boolean(
+      success.html && /<h[12]\b/i.test(success.html)
+    );
+
     return (
       <section
         aria-live="polite"
@@ -28,11 +32,13 @@ export function SubmissionStatus({
           />
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#57482D]">
-              Viewing Request Confirmed
+              {htmlHasHeading ? 'Appointment Scheduled' : 'Viewing Request Confirmed'}
             </p>
-            <h2 className="text-2xl font-medium tracking-tight text-[#151513]">
-              {success.message}
-            </h2>
+            {!htmlHasHeading && (
+              <h2 className="text-2xl font-medium tracking-tight text-[#151513]">
+                {success.message}
+              </h2>
+            )}
           </div>
         </div>
 

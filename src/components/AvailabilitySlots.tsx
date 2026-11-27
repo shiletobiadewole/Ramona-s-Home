@@ -58,7 +58,7 @@ export function AvailabilitySlots({
       role="alert"
       aria-live="assertive"
       aria-label="Viewing time availability update"
-      className="animate-viewing-alert border-2 border-[#57482D] bg-[#FCF0D8]/70 p-5 sm:p-8 space-y-6 rounded-sm"
+      className="animate-viewing-slide-right border-2 border-[#57482D] bg-[#FCF0D8]/80 p-4 sm:p-6 space-y-5 rounded-sm shadow-lg"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
@@ -113,7 +113,7 @@ export function AvailabilitySlots({
           <div
             role="radiogroup"
             aria-label="Available alternative viewing slots"
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3"
           >
             {response.availableSlots.map((slot) => {
               const isSelected = selectedSlotDateTime === slot.dateTime;
@@ -171,7 +171,7 @@ export function AvailabilitySlots({
           </div>
 
           {selectedSlotDateTime && (
-            <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[#B6AF9D]/55">
+            <div className="pt-3 flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-stretch justify-between gap-4 border-t border-[#B6AF9D]/55">
               <p className="text-xs text-[#534F46]">
                 Selecting a slot updates your requested date and time. Final confirmation
                 is verified upon submission.
@@ -180,7 +180,7 @@ export function AvailabilitySlots({
                 type="button"
                 disabled={isSubmitting}
                 onClick={onConfirmSelectedSlot}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto min-h-[46px] px-6 py-3 text-sm font-medium text-[#FDFAF0] bg-[#57482D] hover:bg-[#423620] disabled:opacity-60 transition-colors rounded-sm whitespace-nowrap shrink-0"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto lg:w-full min-h-[46px] px-6 py-3 text-sm font-medium text-[#FDFAF0] bg-[#57482D] hover:bg-[#423620] disabled:opacity-60 transition-colors rounded-sm whitespace-nowrap shrink-0"
               >
                 {isSubmitting ? 'Verifying Slot...' : 'Submit Selected Alternative'}
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
